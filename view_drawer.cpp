@@ -3,6 +3,9 @@
 #include "view_drawer.h"
 #include "main.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 void ViewDrawer::initialize() {
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	
@@ -23,6 +26,8 @@ void ViewDrawer::deinitialize() {
 
 }
 
+
+
 void ViewDrawer::draw_screen() {
 	// glClearColor(0, 0, 1.0, 0);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -31,16 +36,18 @@ void ViewDrawer::draw_screen() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	//Reorient the camera based on the player's orientation
+	float theta = -game.get_logic().get_player_ori(0);
+	glRotatef(theta, 0.0, 1.0, 0.0);
+	glRotatef(-game.get_logic().get_player_ori(1), cos(theta*M_PI/180.0), 0.0, sin(theta*M_PI/180.0));
+
+	glPushMatrix();
 	//Orient the world to the camera
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
 	glScalef(.01, .01, .1);
 
 	//Move the camera based on the player's location
 	glTranslatef(-game.get_logic().get_player_loc(0), -game.get_logic().get_player_loc(1), 0.0);
-
-	//Reorient the camera based on the player's orientation
-	glRotatef(-game.get_logic().get_player_ori(0), 0.0, 0.0, 1.0);
-	// glRotatef(-)
 
 	game.get_terrain().draw_terrain();
 	glBegin(GL_QUADS);
@@ -50,4 +57,6 @@ void ViewDrawer::draw_screen() {
       glVertex3f(-1.0f, 1.0f,  1.0f);
       glVertex3f( 1.0f, 1.0f,  1.0f);
 	glEnd();
+
+	glPopMatrix();
 }

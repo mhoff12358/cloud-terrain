@@ -27,7 +27,7 @@ public:
 	
 	//Movement key bindings: up, right, back, left
 	const array<SDL_Keycode, 4> MOVE_KEYS = {{SDLK_w, SDLK_d, SDLK_s, SDLK_a}};
-	const array<float, 2> LOOK_SENSITIVITY = {{0.75, 0.25}};
+	const array<float, 2> LOOK_SENSITIVITY {{0.75f, 0.25}};
 };
 
 #endif

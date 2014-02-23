@@ -12,15 +12,11 @@ void GameLogic::update_world() {
 	//Handle mouse looking
 	array<int, 2> motion_rel = {{0, 0}};
 	while (mouse_motion_queue.size() != 0) {
-		std::cout << "B: " << mouse_motion_queue.front()[0] << std::endl;
 		array<int, 4>& motion_event = mouse_motion_queue.front();
 		motion_rel[0] += motion_event[0];
 		motion_rel[1] += motion_event[1];
 		mouse_motion_queue.pop();
-	// 	std::cout << "aah" << std::endl;
 	}
-	// std::cout << player_ori[0] << "\t" << motion_rel[0] << std::endl;
-	std::cout << game.get_controller().LOOK_SENSITIVITY[0] << std::endl;
 	for (int o = 0; o < 2; o++) {
 		// player_ori[o] = (player_ori[o]-(float)motion_rel[o]*game.get_controller().LOOK_SENSITIVITY[o]);
 		player_ori[o] = (player_ori[o]-(float)motion_rel[o]*0.75);
@@ -53,5 +49,4 @@ void GameLogic::add_mouse_motion(array<int, 4> new_motion) {
 	//The motions that are added should be in the form of xrel, yrel, x, y
 	// std::cout << new_motion[0] << std::endl;
 	mouse_motion_queue.emplace(new_motion);
-	std::cout << "A: " << mouse_motion_queue.front()[0] << std::endl;
 }
