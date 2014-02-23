@@ -26,9 +26,23 @@ void Game::mainloop() {
 			exit_program(1);
 		}
 
+		gl.update_world();
+
 		vd.draw_screen();
 		vs.render_screen();
 	}
+}
+
+WorldTerrain& Game::get_terrain() {
+	return wt;
+}
+
+GameLogic& Game::get_logic() {
+	return gl;
+}
+
+IOController& Game::get_controller() {
+	return ioc;
 }
 
 int main(int argc, char ** argv) {
