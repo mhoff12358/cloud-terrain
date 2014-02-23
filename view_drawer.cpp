@@ -35,16 +35,19 @@ void ViewDrawer::draw_screen() {
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
 	glScalef(.01, .01, .1);
 
-	//Move the camera based on the player's position
+	//Move the camera based on the player's location
 	glTranslatef(-game.get_logic().get_player_loc(0), -game.get_logic().get_player_loc(1), 0.0);
 
-	game.get_terrain().draw_terrain();
+	//Reorient the camera based on the player's orientation
+	glRotatef(-game.get_logic().get_player_ori(0), 0.0, 0.0, 1.0);
+	// glRotatef(-)
 
-	// glBegin(GL_POLYGON);
-	// 	glColor3f(   1.0,  1.0, 1.0 );
-	// 	glVertex3f(  0.5, -0.5, 0.0 );
-	// 	glVertex3f(  0.5,  0.5, 0.0 );
-	// 	glVertex3f( -0.5,  0.5, 0.0 );
-	// 	glVertex3f( -0.5, -0.5, 0.0 );
-	// glEnd();
+	game.get_terrain().draw_terrain();
+	glBegin(GL_QUADS);
+	glColor3f(0.0f, 1.0f, 0.0f);
+      glVertex3f( 1.0f, 1.0f, -1.0f);
+      glVertex3f(-1.0f, 1.0f, -1.0f);
+      glVertex3f(-1.0f, 1.0f,  1.0f);
+      glVertex3f( 1.0f, 1.0f,  1.0f);
+	glEnd();
 }

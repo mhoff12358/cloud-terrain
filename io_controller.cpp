@@ -12,8 +12,9 @@ int IOController::process_events() {
 			handle_keypress(event.key.keysym);
 		} else if (event.type == SDL_KEYUP && event.key.repeat) {
 			handle_keyrelease(event.key.keysym);
-		} else if (event.type == SDL_MOUSEBUTTONDOWN) {
-			// return 1;
+		} else if (event.type == SDL_MOUSEMOTION) {
+			// std::cout << array<int, 4>({{event.motion.xrel, event.motion.yrel, event.motion.x, event.motion.y}})[0] << std::endl;
+			game.get_logic().add_mouse_motion(array<int, 4>({{event.motion.xrel, event.motion.yrel, event.motion.x, event.motion.y}}));
 		}
 	}
 	return 0;
