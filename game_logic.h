@@ -7,6 +7,9 @@
 #include <queue>
 #include <array>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 using std::queue;
 using std::array;
 

@@ -3,9 +3,6 @@
 #include "view_drawer.h"
 #include "main.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 void ViewDrawer::initialize() {
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	

@@ -6,6 +6,9 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 class Game;
 
 class ViewDrawer {

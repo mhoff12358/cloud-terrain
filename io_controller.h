@@ -6,7 +6,6 @@
 #include <array>
 
 #include <SDL2/SDL.h>
-// #include <SDL2/SDL_keycode.h>
 
 using std::array;
 
@@ -25,8 +24,8 @@ public:
 	int process_events();
 	Uint8 get_keypressed(SDL_Keycode);
 	
-	//Movement key bindings: up, right, back, left
-	const array<SDL_Keycode, 4> MOVE_KEYS = {{SDLK_w, SDLK_d, SDLK_s, SDLK_a}};
+	//Movement key bindings: back, left, forward, right
+	const array<SDL_Keycode, 4> MOVE_KEYS = {{SDLK_d, SDLK_s, SDLK_a, SDLK_w}};
 	const array<float, 2> LOOK_SENSITIVITY {{0.75f, 0.25}};
 };
 

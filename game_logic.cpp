@@ -26,14 +26,11 @@ void GameLogic::update_world() {
 
 	//Handle keyboard movement
 	IOController& ioc = game.get_controller();
-	if (ioc.get_keypressed(ioc.MOVE_KEYS[0])) {
-		player_loc[1] += 10*time_scale;
-	} if (ioc.get_keypressed(ioc.MOVE_KEYS[1])) {
-		player_loc[0] += 10*time_scale;
-	} if (ioc.get_keypressed(ioc.MOVE_KEYS[2])) {
-		player_loc[1] -= 10*time_scale;
-	} if (ioc.get_keypressed(ioc.MOVE_KEYS[3])) {
-		player_loc[0] -= 10*time_scale;
+	for (int dir = 0; dir < 4; dir++) {
+		if (ioc.get_keypressed(ioc.MOVE_KEYS[dir])) {
+			player_loc[0] += time_scale*cos(M_PI*(player_ori[0]-90*dir)/180);
+			player_loc[1] += time_scale*sin(M_PI*(player_ori[0]-90*dir)/180);
+		}
 	}
 }
 

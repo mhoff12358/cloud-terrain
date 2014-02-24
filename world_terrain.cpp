@@ -1,7 +1,7 @@
 #include "world_terrain.h"
 
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
-	cg.resize_cloud({{-400, -400, 400, 400}});
+	cg.resize_cloud({{-100, -100, 100, 100}});
 	cg.write_cloud("terrain.txt");
 }
 
