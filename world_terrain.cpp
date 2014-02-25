@@ -1,11 +1,20 @@
 #include "world_terrain.h"
+#include "main.h"
+
+void sphereVertex(float, float, float);
 
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
 	cg.resize_cloud({{-100, -100, 100, 100}});
 	cg.write_cloud("terrain.txt");
 }
 
+void WorldTerrain::initialize() {
+	generate_stars(50);
+}
+
 void WorldTerrain::draw_terrain() {
+	glPushMatrix();
+	glScalef(terrain_scale[0], terrain_scale[0], terrain_scale[1]);
 	for (int x = cg.get_size()[0]; x < cg.get_size()[2]; x++) {
 		glBegin(GL_TRIANGLE_STRIP);
 		for (int y = cg.get_size()[1]; y+1 < cg.get_size()[3]; y++) {
@@ -16,4 +25,96 @@ void WorldTerrain::draw_terrain() {
 		}
 		glEnd();
 	}
+	glPopMatrix();
+}
+
+void WorldTerrain::draw_skybox() {
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+
+	//Sky!
+	glColor3f(100./255, 149./255, 237./255);
+	glBegin(GL_QUADS); //Front
+		glVertex3f( 0.5f, -0.5f, -0.5f);
+		glVertex3f(-0.5f, -0.5f, -0.5f);
+		glVertex3f(-0.5f,  0.5f, -0.5f);
+		glVertex3f( 0.5f,  0.5f, -0.5f);
+	glEnd();
+	glBegin(GL_QUADS); //Left
+		glVertex3f( 0.5f, -0.5f,  0.5f);
+		glVertex3f( 0.5f, -0.5f, -0.5f);
+		glVertex3f( 0.5f,  0.5f, -0.5f);
+		glVertex3f( 0.5f,  0.5f,  0.5f);
+	glEnd();
+	glBegin(GL_QUADS); //Back
+		glVertex3f(-0.5f, -0.5f,  0.5f);
+		glVertex3f( 0.5f, -0.5f,  0.5f);
+		glVertex3f( 0.5f,  0.5f,  0.5f);
+		glVertex3f(-0.5f,  0.5f,  0.5f);
+	glEnd();
+	glBegin(GL_QUADS); //Right
+		glVertex3f(-0.5f, -0.5f, -0.5f);
+		glVertex3f(-0.5f, -0.5f,  0.5f);
+		glVertex3f(-0.5f,  0.5f,  0.5f);
+		glVertex3f(-0.5f,  0.5f, -0.5f);
+	glEnd();
+	glColor3f(0, 0, 0);
+	glBegin(GL_QUADS); //Top
+		glVertex3f(-0.5f,  0.5f, -0.5f);
+		glVertex3f(-0.5f,  0.5f,  0.5f);
+		glVertex3f( 0.5f,  0.5f,  0.5f);
+		glVertex3f( 0.5f,  0.5f, -0.5f);
+	glEnd();
+	glColor3f(100./255, 149./255, 237./255);
+	glBegin(GL_QUADS); //Bottom
+		glVertex3f(-0.5f, -0.5f, -0.5f);
+		glVertex3f(-0.5f, -0.5f,  0.5f);
+		glVertex3f( 0.5f, -0.5f,  0.5f);
+		glVertex3f( 0.5f, -0.5f, -0.5f);
+	glEnd();
+
+	//Stars!
+	float w = 1.0, h = 1.0;
+	// SDL_GL_BindTexture(game.get_state().grump, &w, &h);
+	glBindTexture(GL_TEXTURE_2D, game.get_state().grumptex);
+	for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
+		glEnable(GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+		glColor3f(0, 1, 0);
+		glTexCoord2f(0, 0);  sphereVertex((*s)[0]-.1, (*s)[1]-.1, 1.0);
+		glTexCoord2f(w, 0);  sphereVertex((*s)[0]+.1, (*s)[1]-.1, 1.0);
+		glTexCoord2f(w, h);  sphereVertex((*s)[0]+.1, (*s)[1]+.1, 1.0);
+		glTexCoord2f(0, h);  sphereVertex((*s)[0]-.1, (*s)[1]+.1, 1.0);
+		// glTexCoord2f(0, h);  sphereVertex((*s)[0]-.1, (*s)[1]-.1, 1.0);
+		// glTexCoord2f(w, h);  sphereVertex((*s)[0]+.1, (*s)[1]-.1, 1.0);
+		// glTexCoord2f(w, 0);  sphereVertex((*s)[0]+.1, (*s)[1]+.1, 1.0);
+		// glTexCoord2f(0, 0);  sphereVertex((*s)[0]-.1, (*s)[1]+.1, 1.0);
+		glEnd();
+		glDisable(GL_TEXTURE_2D);
+	}
+	// SDL_GL_UnbindTexture(game.get_state().grump);
+
+	glPopAttrib();
+}
+
+void sphereVertex(float theta, float phi, float radius) {
+	float x = cos(theta)*sin(phi)*radius;
+	float z = sin(theta)*sin(phi)*radius;
+	float y = cos(phi)*radius;
+	glVertex3f(x, y, z);
+}
+
+void WorldTerrain::generate_stars(unsigned int num_stars) {
+	for (unsigned int star_no = 0; star_no < num_stars; star_no++) {
+		float theta = (float)(rand())/(float)(RAND_MAX/(2*M_PI));
+		float phi = ((float)M_PI/2.0)+asin(((float)(rand())/(float)(RAND_MAX/2))-1);
+
+		stars.emplace_back(array<float, 2>({{theta, phi}}));
+	}
+}
+
+float WorldTerrain::get_height(const float x, const float y) {
+	return cg.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
 }

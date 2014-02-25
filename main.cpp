@@ -20,6 +20,10 @@ void Game::mainloop() {
 	vs.create_GL_context();
 
 	vd.initialize();
+	ioc.initialize();
+	wt.initialize();
+
+	vs.load_images();
 
 	while (1) {
 		if (ioc.process_events() != 0){
@@ -43,6 +47,10 @@ GameLogic& Game::get_logic() {
 
 IOController& Game::get_controller() {
 	return ioc;
+}
+
+ViewState& Game::get_state() {
+	return vs;
 }
 
 int main(int argc, char ** argv) {

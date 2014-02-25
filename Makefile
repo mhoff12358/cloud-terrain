@@ -1,6 +1,6 @@
 
 SDL_INCLUDE = -IC:/MinGW/include
-SDL_LIB = -LC:/MinGW/lib -lSDL2main -lSDL2
+SDL_LIB = -LC:/MinGW/lib -lSDL2main -lSDL2 -lSDL2_image
 # GL_INCLUDE = 
 GL_LIB = -lopengl32 -lglu32
 

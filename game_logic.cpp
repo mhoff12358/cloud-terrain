@@ -20,17 +20,23 @@ void GameLogic::update_world() {
 	for (int o = 0; o < 2; o++) {
 		// player_ori[o] = (player_ori[o]-(float)motion_rel[o]*game.get_controller().LOOK_SENSITIVITY[o]);
 		player_ori[o] = (player_ori[o]-(float)motion_rel[o]*0.75);
-		while (player_ori[o] < 0) {player_ori[o] += 360;}
-		while (player_ori[o] > 360) {player_ori[o] -= 360;}
 	}
+	while (player_ori[0] < 0) {player_ori[0] += 360;}
+	while (player_ori[0] > 360) {player_ori[0] -= 360;}
+	player_ori[1] = fmax(-90, fmin(90, player_ori[1]));
 
 	//Handle keyboard movement
 	IOController& ioc = game.get_controller();
+	bool moved = false;
 	for (int dir = 0; dir < 4; dir++) {
 		if (ioc.get_keypressed(ioc.MOVE_KEYS[dir])) {
-			player_loc[0] += time_scale*cos(M_PI*(player_ori[0]-90*dir)/180);
-			player_loc[1] += time_scale*sin(M_PI*(player_ori[0]-90*dir)/180);
+			player_loc[0] += time_scale*move_scale*cos(M_PI*(player_ori[0]-90*dir)/180);
+			player_loc[1] += time_scale*move_scale*sin(M_PI*(player_ori[0]-90*dir)/180);
+			moved = true;
 		}
+	}
+	if (moved) {
+		player_loc[2] = game.get_terrain().get_height(player_loc[0], player_loc[1])+.6;
 	}
 }
 
@@ -44,6 +50,5 @@ float GameLogic::get_player_ori(int dim) {
 
 void GameLogic::add_mouse_motion(array<int, 4> new_motion) {
 	//The motions that are added should be in the form of xrel, yrel, x, y
-	// std::cout << new_motion[0] << std::endl;
 	mouse_motion_queue.emplace(new_motion);
 }

@@ -3,6 +3,8 @@
 #define __VIEW_STATE_H_INCLUDED__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_opengl.h>
 #include <string>
 
 class ViewState {
@@ -29,7 +31,13 @@ public:
 	void create_GL_context();
 	int check_valid();
 
+	void load_images();
+	void unload_images();
+
 	void render_screen();
+
+	SDL_Texture * grump;
+	GLuint grumptex;
 
 };
 

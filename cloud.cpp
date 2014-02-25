@@ -119,6 +119,17 @@ float CloudGrid::get_point(const int x, const int y) {
 	return 0.0;
 }
 
+float CloudGrid::get_height(const float x, const float y) {
+	if (x >= cloud_size[0] && x+1 < cloud_size[2] &&
+		y >= cloud_size[1] && y+1 < cloud_size[3]) {
+		float xscale = ceil(x)-x; //Weighting of floor(x) over ceiling(x)
+		float yscale = ceil(y)-y; //Weighting of floor(y) over ceiling(y)
+		return yscale*(xscale*get_point(floor(x), floor(y)) + (1-xscale)*get_point(ceil(x), floor(y)))+
+		(1-yscale)*(xscale*get_point(floor(x), ceil(y)) + (1-xscale)*get_point(ceil(x), ceil(y)));
+	}
+	return 0.0;
+}
+
 void CloudGrid::set_size(const array<int, 4> new_size) {
 	resize_cloud(new_size);
 }
@@ -183,6 +194,11 @@ void CloudGrid::generate_cloud(const array<int, 4> preserve_area) {
 				add_cloud(x, y, preserve_area);
 			}
 		}
+		for (int x = cloud_size[0]-over_scan; x < cloud_size[2]+over_scan; x++) {
+			for (int y = cloud_size[1]-over_scan; y < cloud_size[3]+over_scan; y++) {
+				set_point(x, y, height_finalize_fn(x, y, get_point(x, y)));
+			}
+		}
 	} else {
 		//There must be a gap in the y range, so iterate over x and then iterate over y, checking
 		//to see if there is a gap that needs to be jumped based on the x range.
@@ -198,6 +214,22 @@ void CloudGrid::generate_cloud(const array<int, 4> preserve_area) {
 				}
 				for (int y = preserve_area[3]-over_scan; y < cloud_size[3]+over_scan; y++) {
 					add_cloud(x, y, preserve_area);
+				}
+			}
+		}
+		//Now do the finialization function
+		for (int x = cloud_size[0]-over_scan; x < cloud_size[2]+over_scan; x++) {
+			if (x <= preserve_area[0]+over_scan || x >= preserve_area[2]-over_scan) {
+				//No gap in the y range, because everything will be in the x range
+				for (int y = cloud_size[1]-over_scan; y < cloud_size[3]+over_scan; y++) {
+					set_point(x, y, height_finalize_fn(x, y, get_point(x, y)));
+				}
+			} else {
+				for (int y = cloud_size[1]-over_scan; y < preserve_area[1]+over_scan; y++) {
+					set_point(x, y, height_finalize_fn(x, y, get_point(x, y)));
+				}
+				for (int y = preserve_area[3]-over_scan; y < cloud_size[3]+over_scan; y++) {
+					set_point(x, y, height_finalize_fn(x, y, get_point(x, y)));
 				}
 			}
 		}

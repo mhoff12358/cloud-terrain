@@ -23,6 +23,7 @@ public:
 	WorldTerrain& get_terrain();
 	GameLogic& get_logic();
 	IOController& get_controller();
+	ViewState& get_state();
 };
 
 #endif

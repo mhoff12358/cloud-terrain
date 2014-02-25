@@ -52,6 +52,7 @@ public:
 
 	float get_point(const int, const int);
 	void set_point(const int, const int, const float);
+	float get_height(const float, const float);
 	array<int, 4> get_size();
 	void set_size(const array<int, 4>);
 	// void compute_cloud();

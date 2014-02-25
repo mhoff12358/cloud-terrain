@@ -2,15 +2,19 @@
 
 #include "main.h"
 
+void IOController::initialize() {
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+}
+
 int IOController::process_events() {
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
 			return 1;
-		} else if (event.type == SDL_KEYDOWN && event.key.repeat) {
+		} else if (event.type == SDL_KEYDOWN && !event.key.repeat) {
 			handle_keypress(event.key.keysym);
-		} else if (event.type == SDL_KEYUP && event.key.repeat) {
+		} else if (event.type == SDL_KEYUP && !event.key.repeat) {
 			handle_keyrelease(event.key.keysym);
 		} else if (event.type == SDL_MOUSEMOTION) {
 			// std::cout << array<int, 4>({{event.motion.xrel, event.motion.yrel, event.motion.x, event.motion.y}})[0] << std::endl;
@@ -21,7 +25,9 @@ int IOController::process_events() {
 }
 
 void IOController::handle_keypress(SDL_Keysym key_info) {
-
+	if (key_info.sym == SDLK_ESCAPE) {
+		game.exit_program(0);
+	}
 }
 
 void IOController::handle_keyrelease(SDL_Keysym key_info) {

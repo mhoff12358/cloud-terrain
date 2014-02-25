@@ -23,9 +23,11 @@ private:
 
 	bool move_toggles[4] = {false, false, false, false};
 
-	float player_loc[2] = {0.0, 0.0}; //x, y
+	float player_loc[3] = {0.0, 0.0, 0.0}; //x, y
 	float player_ori[2] = {0.0, 0.0}; //theta, phi
 	queue<array<int, 4>> mouse_motion_queue; //xrel, yrel, x, y
+
+	float move_scale = 20.0;
 
 public:
 	GameLogic(Game& g) : game(g) {}

@@ -21,6 +21,8 @@ private:
 public:
 	IOController(Game& g) : game(g) {}
 
+	void initialize();
+
 	int process_events();
 	Uint8 get_keypressed(SDL_Keycode);
 	
