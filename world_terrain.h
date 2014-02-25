@@ -31,7 +31,7 @@ public:
 	void initialize();
 
 	void draw_terrain();
-	void draw_skybox();
+	void draw_skypbox();
 	float get_height(const float, const float);
 };
 

@@ -28,7 +28,7 @@ void WorldTerrain::draw_terrain() {
 	glPopMatrix();
 }
 
-void WorldTerrain::draw_skybox() {
+void WorldTerrain::draw_skypbox() {
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
