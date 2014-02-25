@@ -84,10 +84,10 @@ void WorldTerrain::draw_skybox() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBegin(GL_QUADS);
 		glColor4f(1, 1, 1, 1);
-		glTexCoord2f(0, 0);  sphereVertex((*s)[0]-(.1/sin((*s)[1]-.1)), (*s)[1]-.1, 1.0);
-		glTexCoord2f(w, 0);  sphereVertex((*s)[0]+(.1/sin((*s)[1]-.1)), (*s)[1]-.1, 1.0);
-		glTexCoord2f(w, h);  sphereVertex((*s)[0]+(.1/sin((*s)[1]-.1)), (*s)[1]+.1, 1.0);
-		glTexCoord2f(0, h);  sphereVertex((*s)[0]-(.1/sin((*s)[1]-.1)), (*s)[1]+.1, 1.0);
+		glTexCoord2f(0, 0);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+		glTexCoord2f(w, 0);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+		glTexCoord2f(w, h);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+		glTexCoord2f(0, h);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 	}

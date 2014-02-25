@@ -22,7 +22,7 @@ private:
 	const array<float, 2> terrain_scale = {{10, 100}};
 
 	void generate_stars(unsigned int);
-	int star_size = 0.02;
+	float star_size = 0.08;
 	vector<array<float, 2>> stars;
 
 public:
