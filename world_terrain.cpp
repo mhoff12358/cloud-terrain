@@ -77,24 +77,20 @@ void WorldTerrain::draw_skybox() {
 
 	//Stars!
 	float w = 1.0, h = 1.0;
-	// SDL_GL_BindTexture(game.get_state().grump, &w, &h);
 	glBindTexture(GL_TEXTURE_2D, game.get_state().grumptex);
 	for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
 		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBegin(GL_QUADS);
-		glColor3f(0, 1, 0);
-		glTexCoord2f(0, 0);  sphereVertex((*s)[0]-.1, (*s)[1]-.1, 1.0);
-		glTexCoord2f(w, 0);  sphereVertex((*s)[0]+.1, (*s)[1]-.1, 1.0);
-		glTexCoord2f(w, h);  sphereVertex((*s)[0]+.1, (*s)[1]+.1, 1.0);
-		glTexCoord2f(0, h);  sphereVertex((*s)[0]-.1, (*s)[1]+.1, 1.0);
-		// glTexCoord2f(0, h);  sphereVertex((*s)[0]-.1, (*s)[1]-.1, 1.0);
-		// glTexCoord2f(w, h);  sphereVertex((*s)[0]+.1, (*s)[1]-.1, 1.0);
-		// glTexCoord2f(w, 0);  sphereVertex((*s)[0]+.1, (*s)[1]+.1, 1.0);
-		// glTexCoord2f(0, 0);  sphereVertex((*s)[0]-.1, (*s)[1]+.1, 1.0);
+		glColor4f(1, 1, 1, 1);
+		glTexCoord2f(0, 0);  sphereVertex((*s)[0]-(.1/sin((*s)[1]-.1)), (*s)[1]-.1, 1.0);
+		glTexCoord2f(w, 0);  sphereVertex((*s)[0]+(.1/sin((*s)[1]-.1)), (*s)[1]-.1, 1.0);
+		glTexCoord2f(w, h);  sphereVertex((*s)[0]+(.1/sin((*s)[1]-.1)), (*s)[1]+.1, 1.0);
+		glTexCoord2f(0, h);  sphereVertex((*s)[0]-(.1/sin((*s)[1]-.1)), (*s)[1]+.1, 1.0);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 	}
-	// SDL_GL_UnbindTexture(game.get_state().grump);
 
 	glPopAttrib();
 }

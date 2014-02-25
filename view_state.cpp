@@ -61,14 +61,14 @@ void ViewState::render_screen() {
 }
 
 void ViewState::load_images() {
-	SDL_Surface * sgrump = IMG_Load("images/bah.png");
-	if (sgrump) {
-		std::cout << "OKAY!" << std::endl;
+	SDL_Surface * sgrump = IMG_Load("images/arin_grump.png");
+	if (!sgrump) {
+		std::cout << "Image loading error" << std::endl;
 	}
 
 	glGenTextures(1, &grumptex);
 	glBindTexture(GL_TEXTURE_2D, grumptex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sgrump->w, sgrump->h, 0, GL_RGB, GL_UNSIGNED_BYTE, sgrump->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sgrump->w, sgrump->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, sgrump->pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

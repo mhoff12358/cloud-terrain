@@ -10,6 +10,7 @@ void ViewDrawer::initialize() {
 	glShadeModel(GL_SMOOTH);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
 	glDepthFunc(GL_LEQUAL);
 
