@@ -4,8 +4,13 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
+
 #include <string>
+#include <cstdio>
+
+#include "shader.h"
 
 class ViewState {
 private:
@@ -16,6 +21,8 @@ private:
 	SDL_Renderer * renderer = NULL;
 	SDL_GLContext context;
 	std::string creation_errors;
+
+	// ShaderProgram skybox_shad;
 
 public:
 	SDL_Window * get_window() {return window;};
@@ -29,6 +36,7 @@ public:
 	void create_renderer();
 	void destroy_renderer();
 	void create_GL_context();
+	void create_shaders();
 	int check_valid();
 
 	void load_images();
@@ -39,6 +47,7 @@ public:
 	SDL_Texture * grump;
 	GLuint grumptex;
 
+	GLuint skybox_vert_shad, skybox_frag_shad, skybox_shad_prog;
 };
 
 #endif

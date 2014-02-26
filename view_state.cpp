@@ -1,6 +1,25 @@
 #include "view_state.h"
 #include <iostream>
 
+char* filetobuf(char *file, int * length)
+{
+    FILE *fptr;
+    char *buf;
+
+    fptr = fopen(file, "r"); /* Open file for reading */
+    if (!fptr) /* Return NULL on failure */
+        return NULL;
+    fseek(fptr, 0, SEEK_END); /* Seek to the end of the file */
+    *length = ftell(fptr); /* Find out how many bytes into the file we are */
+    buf = new char[*length+1]; /* Allocate a buffer for the entire length of the file and a null terminator */
+    fseek(fptr, 0, SEEK_SET); /* Go back to the beginning of the file */
+    fread(buf, *length, 1, fptr); /* Read the contents of the file in to the buffer */
+    fclose(fptr); /* Close the file */
+    buf[*length] = 0; /* Null terminator */
+
+    return buf; /* Return the buffer */
+}
+
 int ViewState::initialize() {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		return 1;
@@ -48,6 +67,9 @@ void ViewState::create_GL_context() {
 	context = SDL_GL_CreateContext(window);
 }
 
+void ViewState::create_shaders() {
+}
+
 int ViewState::check_valid() {
 	if (window != NULL && renderer != NULL) {
 		return 0;
@@ -61,7 +83,7 @@ void ViewState::render_screen() {
 }
 
 void ViewState::load_images() {
-	SDL_Surface * sgrump = IMG_Load("images/arin_grump.png");
+	SDL_Surface * sgrump = IMG_Load("images/star.png");
 	if (!sgrump) {
 		std::cout << "Image loading error" << std::endl;
 	}

@@ -8,6 +8,7 @@ void GameLogic::update_world() {
 	game_clock += time_diff;
 
 	float time_scale = ((float)time_diff)/CLOCKS_PER_SEC;
+	// std::cout << "FPS: " << 1.0/time_scale << std::endl;
 
 	//Handle mouse looking
 	array<int, 2> motion_rel = {{0, 0}};

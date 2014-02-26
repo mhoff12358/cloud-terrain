@@ -2,7 +2,7 @@
 SDL_INCLUDE = -IC:/MinGW/include
 SDL_LIB = -LC:/MinGW/lib -lSDL2main -lSDL2 -lSDL2_image
 # GL_INCLUDE = 
-GL_LIB = -lopengl32 -lglu32
+GL_LIB = -lglew32 -lopengl32 -lglu32
 
 COMPILER = g++
 COMPILER_FLAGS = -Wall -c -g -std=c++11 $(SDL_INCLUDE)
@@ -12,8 +12,8 @@ EXE = main.exe
 
 all: $(EXE) cloud.exe
 
-$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o cloud.o
-	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o cloud.o $(LD_FLAGS) -o $@
+$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o
+	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o $(LD_FLAGS) -o $@
 
 main.o: main.cpp main.h
 	$(COMPILER) $(COMPILER_FLAGS) main.cpp -o $@
@@ -32,6 +32,9 @@ world_terrain.o: world_terrain.cpp world_terrain.h
 
 game_logic.o: game_logic.cpp game_logic.h
 	$(COMPILER) $(COMPILER_FLAGS) game_logic.cpp -o $@
+
+shader.o: shader.cpp shader.h
+	$(COMPILER) $(COMPILER_FLAGS) shader.cpp -o $@
 
 cloud.exe: cloud.o cloud_example.cpp
 	$(COMPILER) cloud_example.cpp cloud.o $(LD_FLAGS) -o $@

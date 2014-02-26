@@ -3,8 +3,8 @@
 #define __WORLD_TERRAIN_H_INCLUDED__
 
 #include <SDL2/SDL.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
+#include <GL/wglew.h>
 
 #include <iostream>
 #include <array>
@@ -24,6 +24,7 @@ private:
 	void generate_stars(unsigned int);
 	float star_size = 0.08;
 	vector<array<float, 2>> stars;
+
 
 public:
 	WorldTerrain(Game& g);

@@ -4,11 +4,12 @@
 void sphereVertex(float, float, float);
 
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
-	cg.resize_cloud({{-100, -100, 100, 100}});
-	cg.write_cloud("terrain.txt");
 }
 
 void WorldTerrain::initialize() {
+	cg.resize_cloud({{-100, -100, 100, 100}});
+	cg.write_cloud("terrain.txt");
+
 	generate_stars(50);
 }
 
@@ -36,6 +37,7 @@ void WorldTerrain::draw_skypbox() {
 
 	//Sky!
 	glColor3f(100./255, 149./255, 237./255);
+	glColor3f(0, 0, 0);
 	glBegin(GL_QUADS); //Front
 		glVertex3f( 0.5f, -0.5f, -0.5f);
 		glVertex3f(-0.5f, -0.5f, -0.5f);
@@ -60,14 +62,12 @@ void WorldTerrain::draw_skypbox() {
 		glVertex3f(-0.5f,  0.5f,  0.5f);
 		glVertex3f(-0.5f,  0.5f, -0.5f);
 	glEnd();
-	glColor3f(0, 0, 0);
 	glBegin(GL_QUADS); //Top
 		glVertex3f(-0.5f,  0.5f, -0.5f);
 		glVertex3f(-0.5f,  0.5f,  0.5f);
 		glVertex3f( 0.5f,  0.5f,  0.5f);
 		glVertex3f( 0.5f,  0.5f, -0.5f);
 	glEnd();
-	glColor3f(100./255, 149./255, 237./255);
 	glBegin(GL_QUADS); //Bottom
 		glVertex3f(-0.5f, -0.5f, -0.5f);
 		glVertex3f(-0.5f, -0.5f,  0.5f);

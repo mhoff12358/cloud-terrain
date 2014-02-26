@@ -1,7 +1,7 @@
+#include "main.h"
 #include <iostream>
 #include <SDL2/SDL.h>
 
-#include "main.h"
 
 void Game::exit_program(int exit_code) {
 	vd.deinitialize();
@@ -24,6 +24,7 @@ void Game::mainloop() {
 	wt.initialize();
 
 	vs.load_images();
+	vs.create_shaders();
 
 	while (1) {
 		if (ioc.process_events() != 0){
