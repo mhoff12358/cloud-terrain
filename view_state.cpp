@@ -68,6 +68,14 @@ void ViewState::create_GL_context() {
 }
 
 void ViewState::create_shaders() {
+	skybox_shad.create_program();
+	skybox_shad.add_shader(GL_VERTEX_SHADER, "skybox_shad.vert");
+	skybox_shad.add_shader(GL_FRAGMENT_SHADER, "skybox_shad.frag");
+	skybox_shad.link_program();
+}
+
+GLuint ViewState::get_skybox_prog() {
+	return skybox_shad.get_program();
 }
 
 int ViewState::check_valid() {

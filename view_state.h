@@ -22,7 +22,7 @@ private:
 	SDL_GLContext context;
 	std::string creation_errors;
 
-	// ShaderProgram skybox_shad;
+	ShaderProgram skybox_shad;
 
 public:
 	SDL_Window * get_window() {return window;};
@@ -47,7 +47,7 @@ public:
 	SDL_Texture * grump;
 	GLuint grumptex;
 
-	GLuint skybox_vert_shad, skybox_frag_shad, skybox_shad_prog;
+	GLuint get_skybox_prog();
 };
 
 #endif

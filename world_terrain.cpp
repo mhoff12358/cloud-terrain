@@ -30,6 +30,8 @@ void WorldTerrain::draw_terrain() {
 }
 
 void WorldTerrain::draw_skypbox() {
+	glUseProgram(game.get_state().get_skybox_prog());
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
