@@ -112,6 +112,7 @@ void ShaderProgram::add_attribute(string attr_name) {
 	if (shader_attributes.size() != 0) {new_attr = shader_attributes.back().first+1;}
 	shader_attributes.emplace_back(pair<unsigned int, string>(new_attr, attr_name));
 	// glBindAttribLocation(program, new_attr, attr_name.data());
+	std::cout << "Adding attribute: " << attr_name.data() << std::endl;
 	glBindAttribLocation(program, 0, attr_name.data());
 }
 

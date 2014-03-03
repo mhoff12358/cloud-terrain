@@ -77,7 +77,7 @@ void ViewState::create_shaders() {
 	ground_shad.add_shader(GL_VERTEX_SHADER, "ground.vert");
 	ground_shad.add_shader(GL_FRAGMENT_SHADER, "ground.frag");
 	glBindFragDataLocation(ground_shad.get_program(), 0, "frag_color");
-	// ground_shad.add_attribute("in_position");
+	ground_shad.add_attribute("in_position");
 	ground_shad.link_program();
 }
 

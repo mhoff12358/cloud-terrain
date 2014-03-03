@@ -41,7 +41,7 @@ void ViewDrawer::draw_screen() {
 	glRotatef(-game.get_logic().get_player_ori(1), cos(theta*M_PI/180.0), 0.0, sin(theta*M_PI/180.0));
 
 	//Draw the skybox
-	game.get_terrain().draw_skypbox();
+	// game.get_terrain().draw_skypbox();
 
 	glPushMatrix();
 	//Orient the world to the camera
