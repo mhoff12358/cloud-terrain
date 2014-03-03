@@ -25,6 +25,11 @@ private:
 	float star_size = 0.08;
 	vector<array<float, 2>> stars;
 
+	void create_ground_vbo();
+	GLuint ground_vbo;
+	unsigned int ground_vbo_size;
+	void add_cloud_vertex(unsigned int, unsigned int, float *);
+
 
 public:
 	WorldTerrain(Game& g);

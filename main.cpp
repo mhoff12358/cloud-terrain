@@ -20,11 +20,13 @@ void Game::mainloop() {
 	vs.create_GL_context();
 
 	vd.initialize();
-	ioc.initialize();
-	wt.initialize();
 
 	vs.load_images();
 	vs.create_shaders();
+
+	ioc.initialize();
+	wt.initialize();
+
 
 	while (1) {
 		if (ioc.process_events() != 0){

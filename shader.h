@@ -27,10 +27,13 @@ public:
 	int add_shader(const GLenum, const string&);
 
 	void create_program();
-
 	void link_program();
-
 	GLint get_program();
+
+	void add_attribute(string);
+
+	vector<pair<unsigned int, string>> shader_attributes;
+
 };
 
 #endif

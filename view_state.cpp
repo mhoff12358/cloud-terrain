@@ -69,13 +69,24 @@ void ViewState::create_GL_context() {
 
 void ViewState::create_shaders() {
 	skybox_shad.create_program();
-	skybox_shad.add_shader(GL_VERTEX_SHADER, "skybox_shad.vert");
-	skybox_shad.add_shader(GL_FRAGMENT_SHADER, "skybox_shad.frag");
+	skybox_shad.add_shader(GL_VERTEX_SHADER, "skybox.vert");
+	skybox_shad.add_shader(GL_FRAGMENT_SHADER, "skybox.frag");
 	skybox_shad.link_program();
+
+	ground_shad.create_program();
+	ground_shad.add_shader(GL_VERTEX_SHADER, "ground.vert");
+	ground_shad.add_shader(GL_FRAGMENT_SHADER, "ground.frag");
+	glBindFragDataLocation(ground_shad.get_program(), 0, "frag_color");
+	// ground_shad.add_attribute("in_position");
+	ground_shad.link_program();
 }
 
 GLuint ViewState::get_skybox_prog() {
 	return skybox_shad.get_program();
+}
+
+GLuint ViewState::get_ground_prog() {
+	return ground_shad.get_program();
 }
 
 int ViewState::check_valid() {

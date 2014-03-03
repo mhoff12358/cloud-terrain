@@ -48,6 +48,9 @@ public:
 	GLuint grumptex;
 
 	GLuint get_skybox_prog();
+	GLuint get_ground_prog();
+	
+	ShaderProgram ground_shad;
 };
 
 #endif
