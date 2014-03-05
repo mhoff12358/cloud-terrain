@@ -51,8 +51,9 @@ void WorldTerrain::initialize() {
 void WorldTerrain::add_cloud_vertex(unsigned int x, unsigned int y, float * vertex_loc) {
 	vertex_loc[0] = (float)x;
 	vertex_loc[1] = (float)y;
-	vertex_loc[2] = 0.0;
-	// vertex_loc[2] = cg.get_point(x, y);
+	// vertex_loc[2] = -1.0;
+	vertex_loc[2] = cg.get_point(x, y);
+	// std::cout << vertex_loc[2] << std::endl;
 }
 
 void WorldTerrain::create_ground_vbo() {
@@ -109,14 +110,25 @@ void WorldTerrain::create_ground_vbo() {
 	std::cout << "Number of vertices being passed to draw arrays: " << ground_vbo_size << std::endl;
 }
 
+void out_44mat(float * mat, const string & desc) {
+	if (desc.size() != 0) {
+		std::cout << desc.data() << std::endl;
+	}
+	std::cout << mat[0] << "\t" << mat[4] << "\t" << mat[8] << "\t" << mat[12] << "\t" << std::endl; 
+	std::cout << mat[1] << "\t" << mat[5] << "\t" << mat[9] << "\t" << mat[13] << "\t" << std::endl; 
+	std::cout << mat[2] << "\t" << mat[6] << "\t" << mat[10] << "\t" << mat[14] << "\t" << std::endl; 
+	std::cout << mat[3] << "\t" << mat[7] << "\t" << mat[11] << "\t" << mat[15] << "\t" << std::endl; 
+}
+
 void WorldTerrain::draw_terrain() {
 	GLuint error;
 	glUseProgram(game.get_state().get_ground_prog());
 	GLfloat mvmat[16], promat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
-	glUniformMatrix4fv(glGetAttribLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
-	glUniformMatrix4fv(glGetAttribLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
+	// out_44mat(promat, "Projection matrix:");
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
 	// std::cout << "GL ERROR: " << glGetError() << std::endl;
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
@@ -160,7 +172,7 @@ void WorldTerrain::draw_skypbox() {
 
 	//Sky!
 	glColor3f(100./255, 149./255, 237./255);
-	glColor3f(0, 0, 0);
+	// glColor3f(0, 0, 0);
 	glBegin(GL_QUADS); //Front
 		glVertex3f( 0.5f, -0.5f, -0.5f);
 		glVertex3f(-0.5f, -0.5f, -0.5f);
