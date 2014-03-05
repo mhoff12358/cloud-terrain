@@ -33,7 +33,7 @@ void stuff() {
 void stuff_draw(GLuint progno) {
 	glUseProgram(progno);
 
-glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
@@ -48,12 +48,13 @@ void WorldTerrain::initialize() {
 	generate_stars(50);
 }
 
-void WorldTerrain::add_cloud_vertex(unsigned int x, unsigned int y, float * vertex_loc) {
+void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc) {
 	vertex_loc[0] = (float)x;
 	vertex_loc[1] = (float)y;
-	// vertex_loc[2] = -1.0;
 	vertex_loc[2] = cg.get_point(x, y);
-	// std::cout << vertex_loc[2] << std::endl;
+	color_loc[0] = 0;
+	color_loc[1] = vertex_loc[2];
+	color_loc[2] = 1-vertex_loc[2];
 }
 
 void WorldTerrain::create_ground_vbo() {
@@ -64,42 +65,33 @@ void WorldTerrain::create_ground_vbo() {
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 
 	array<int, 4> cloud_grid_size = cg.get_size();
-	unsigned int x_max = (cloud_grid_size[2]-cloud_grid_size[0]);
-	unsigned int y_max = (cloud_grid_size[3]-cloud_grid_size[1]);
-	unsigned int cloud_data_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
-	unsigned int number_squares = x_max*y_max;
-	ground_vbo_size = cloud_data_square_size * number_squares;
+	unsigned int loc_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
+	unsigned int col_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
+	unsigned int number_squares = (cloud_grid_size[2]-cloud_grid_size[0])*(cloud_grid_size[3]-cloud_grid_size[1]);
+	ground_vbo_size = (loc_square_size + col_square_size) * number_squares; //
 	float * cloud_data_buffer = new float[ground_vbo_size];
-	float * cdb_iter = cloud_data_buffer;
-	for (unsigned int y = 0; y < y_max; y++) {
-		for (unsigned int x = 0; x < x_max; x++) {
-			add_cloud_vertex(x  , y  , cdb_iter+3*0);
-			add_cloud_vertex(x  , y+1, cdb_iter+3*1);
-			add_cloud_vertex(x+1, y  , cdb_iter+3*2);
-			add_cloud_vertex(x+1, y  , cdb_iter+3*3);
-			add_cloud_vertex(x  , y+1, cdb_iter+3*4);
-			add_cloud_vertex(x+1, y+1, cdb_iter+3*5);
-			cdb_iter += cloud_data_square_size;
+	float * vert_iter = cloud_data_buffer;
+	float * color_iter = cloud_data_buffer+(ground_vbo_size/2);
+	for (int y = cloud_grid_size[1]; y < cloud_grid_size[3]; y++) {
+		for (int x = cloud_grid_size[0]; x < cloud_grid_size[2]; x++) {
+			add_cloud_vertex(x  , y  , vert_iter+3*0, color_iter+3*0);
+			add_cloud_vertex(x  , y+1, vert_iter+3*1, color_iter+3*1);
+			add_cloud_vertex(x+1, y  , vert_iter+3*2, color_iter+3*2);
+			add_cloud_vertex(x+1, y  , vert_iter+3*3, color_iter+3*3);
+			add_cloud_vertex(x  , y+1, vert_iter+3*4, color_iter+3*4);
+			add_cloud_vertex(x+1, y+1, vert_iter+3*5, color_iter+3*5);
+			vert_iter += loc_square_size;
+			color_iter += col_square_size;
 		}
 	}
 
-	// cloud_data_buffer[0] = 0.0;
-	// cloud_data_buffer[1] = 1.0;
-	// cloud_data_buffer[2] = 0.0;
-	// cloud_data_buffer[3] =-1.0;
-	// cloud_data_buffer[4] =-1.0;
-	// cloud_data_buffer[5] = 0.0;
-	// cloud_data_buffer[6] = 1.0;
-	// cloud_data_buffer[7] =-1.0;
-	// cloud_data_buffer[8] = 0.0;
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*ground_vbo_size, cloud_data_buffer, GL_STATIC_DRAW);
+	std::cout << "Number of bytes in the buffer: " << sizeof(float)*ground_vbo_size << std::endl;
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*cloud_data_square_size*number_squares, cloud_data_buffer, GL_STATIC_DRAW);
-	std::cout << "Number of bytes in the buffer: " << sizeof(float)*cloud_data_square_size*number_squares << std::endl;
-
-	glEnableVertexAttribArray(0);
-	// glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	// glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[1].first);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*ground_vbo_size/2);
 
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 	delete[] cloud_data_buffer;
@@ -123,6 +115,9 @@ void out_44mat(float * mat, const string & desc) {
 void WorldTerrain::draw_terrain() {
 	GLuint error;
 	glUseProgram(game.get_state().get_ground_prog());
+
+	glPushMatrix();
+	glScalef(terrain_scale[0], terrain_scale[0], terrain_scale[1]);
 	GLfloat mvmat[16], promat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
@@ -132,11 +127,12 @@ void WorldTerrain::draw_terrain() {
 	// std::cout << "GL ERROR: " << glGetError() << std::endl;
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
-	glDrawArrays(GL_TRIANGLES, 0, ground_vbo_size);
+	glDrawArrays(GL_TRIANGLES, 0, ground_vbo_size/2);
 	error = glGetError();
 	if (error != 0) {
 		std::cout << "GL ERROR: " << glGetError() << std::endl;
 	}
+	glPopMatrix();
 
 	// stuff_draw(game.get_state().get_ground_prog());
 

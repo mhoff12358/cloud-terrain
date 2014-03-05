@@ -113,7 +113,7 @@ void ShaderProgram::add_attribute(string attr_name) {
 	shader_attributes.emplace_back(pair<unsigned int, string>(new_attr, attr_name));
 	// glBindAttribLocation(program, new_attr, attr_name.data());
 	std::cout << "Adding attribute: " << attr_name.data() << std::endl;
-	glBindAttribLocation(program, 0, attr_name.data());
+	glBindAttribLocation(program, new_attr, attr_name.data());
 }
 
 GLint ShaderProgram::get_program() {
