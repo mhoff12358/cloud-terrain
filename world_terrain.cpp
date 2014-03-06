@@ -48,13 +48,27 @@ void WorldTerrain::initialize() {
 	generate_stars(50);
 }
 
-void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc) {
+float min_x;
+float min_y;
+float min_z;
+float minthing(float a, float b) {
+	return (a+b)/2;
+}
+
+void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
 	vertex_loc[0] = (float)x;
 	vertex_loc[1] = (float)y;
 	vertex_loc[2] = cg.get_point(x, y);
 	color_loc[0] = 0;
 	color_loc[1] = vertex_loc[2];
 	color_loc[2] = 1-vertex_loc[2];
+	array<float, 3> normal_vector = cg.get_normal(x, y, terrain_scale);
+	min_x = minthing(min_x, normal_vector[0]);
+	min_y = minthing(min_y, normal_vector[1]);
+	min_z = minthing(min_z, normal_vector[2]);
+	normal_loc[0] = normal_vector[0];
+	normal_loc[1] = normal_vector[1];
+	normal_loc[2] = normal_vector[2]; //Visually, the ground is scaled vertically by terrain_scale[1]/terrain_scale[0]
 }
 
 void WorldTerrain::create_ground_vbo() {
@@ -67,21 +81,27 @@ void WorldTerrain::create_ground_vbo() {
 	array<int, 4> cloud_grid_size = cg.get_size();
 	unsigned int loc_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int col_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
+	unsigned int nor_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int number_squares = (cloud_grid_size[2]-cloud_grid_size[0])*(cloud_grid_size[3]-cloud_grid_size[1]);
-	ground_vbo_size = (loc_square_size + col_square_size) * number_squares; //
+	unsigned int loc_vbo_size = loc_square_size * number_squares;
+	unsigned int col_vbo_size = col_square_size * number_squares;
+	unsigned int nor_vbo_size = nor_square_size * number_squares;
+	ground_vbo_size = loc_vbo_size + col_vbo_size + nor_vbo_size;
 	float * cloud_data_buffer = new float[ground_vbo_size];
 	float * vert_iter = cloud_data_buffer;
-	float * color_iter = cloud_data_buffer+(ground_vbo_size/2);
+	float * color_iter = cloud_data_buffer+(loc_vbo_size);
+	float * norm_iter = cloud_data_buffer+(loc_vbo_size+col_vbo_size);
 	for (int y = cloud_grid_size[1]; y < cloud_grid_size[3]; y++) {
 		for (int x = cloud_grid_size[0]; x < cloud_grid_size[2]; x++) {
-			add_cloud_vertex(x  , y  , vert_iter+3*0, color_iter+3*0);
-			add_cloud_vertex(x  , y+1, vert_iter+3*1, color_iter+3*1);
-			add_cloud_vertex(x+1, y  , vert_iter+3*2, color_iter+3*2);
-			add_cloud_vertex(x+1, y  , vert_iter+3*3, color_iter+3*3);
-			add_cloud_vertex(x  , y+1, vert_iter+3*4, color_iter+3*4);
-			add_cloud_vertex(x+1, y+1, vert_iter+3*5, color_iter+3*5);
+			add_cloud_vertex(x  , y  , vert_iter+3*0, color_iter+3*0, norm_iter+3*0);
+			add_cloud_vertex(x  , y+1, vert_iter+3*1, color_iter+3*1, norm_iter+3*1);
+			add_cloud_vertex(x+1, y  , vert_iter+3*2, color_iter+3*2, norm_iter+3*2);
+			add_cloud_vertex(x+1, y  , vert_iter+3*3, color_iter+3*3, norm_iter+3*3);
+			add_cloud_vertex(x  , y+1, vert_iter+3*4, color_iter+3*4, norm_iter+3*4);
+			add_cloud_vertex(x+1, y+1, vert_iter+3*5, color_iter+3*5, norm_iter+3*5);
 			vert_iter += loc_square_size;
 			color_iter += col_square_size;
+			norm_iter += nor_square_size;
 		}
 	}
 
@@ -91,7 +111,9 @@ void WorldTerrain::create_ground_vbo() {
 	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);
 	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[1].first);
-	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*ground_vbo_size/2);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*loc_vbo_size);
+	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[2].first);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[2].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*(loc_vbo_size+col_vbo_size));
 
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 	delete[] cloud_data_buffer;

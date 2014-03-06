@@ -79,6 +79,7 @@ void ViewState::create_shaders() {
 	glBindFragDataLocation(ground_shad.get_program(), 0, "frag_color");
 	ground_shad.add_attribute("in_position");
 	ground_shad.add_attribute("in_color");
+	ground_shad.add_attribute("in_normal");
 	ground_shad.link_program();
 	std::cout << "PROJ MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "proj_matrix") << std::endl;
 	std::cout << "VIEW MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "view_matrix") << std::endl;

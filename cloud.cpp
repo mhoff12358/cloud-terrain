@@ -1,7 +1,30 @@
 #include "cloud.h"
 #include <time.h>
 
-// using namespace std;
+// using namespace std;}
+
+void out_vert(array<float, 3> a) {
+	std::cout << a[0] << "\t" << a[1] << "\t" << a[2] << std::endl;
+}
+
+array<float, 3> cloud_cross_prod(array<float, 3> a, array<float, 3> b) {
+	array<float, 3> cp;
+	cp[0] = a[1]*b[2]-a[2]*b[1];
+	cp[1] = a[2]*b[0]-a[0]*b[2];
+	cp[2] = a[0]*b[1]-a[1]*b[0];
+	return cp;
+}
+
+array<float, 3> cloud_norm_vec(array<float, 3> in_vec) {
+	// out_vert(in_vec);
+	float mag = pow(pow(in_vec[0], 2) + pow(in_vec[1], 2) + pow(in_vec[2], 2), 0.5);
+	// std::cout << mag << std::endl;
+	array<float, 3> norm_vec;
+	for (unsigned int i = 0; i < 3; i++) {
+		norm_vec[i] = in_vec[i] / mag;
+	}
+	return norm_vec;
+}
 
 #define mix(h) ({					\
 			(h) ^= (h) >> 23;		\
@@ -128,6 +151,26 @@ float CloudGrid::get_height(const float x, const float y) {
 		(1-yscale)*(xscale*get_point(floor(x), ceil(y)) + (1-xscale)*get_point(ceil(x), ceil(y)));
 	}
 	return 0.0;
+}
+
+array<float, 3> CloudGrid::get_tangent(const float x0, const float y0, const float x1, const float y1, const array<float, 2>& scale) {
+	return array<float, 3>({{(x1-x0)*scale[0], (y1-y0)*scale[0], (get_height(x1, y1)-get_height(x0, y0))*scale[1]}});
+}
+
+array<float, 3> CloudGrid::get_normal(const int x, const int y, const array<float, 2>& scale) {
+	array<float, 3> summed_norm = {{0, 0, 0}};
+	array<array<float, 3>, 4> tan_vectors;
+	tan_vectors[0] = get_tangent(x, y, x+1, y, scale);
+	tan_vectors[1] = get_tangent(x, y, x, y+1, scale);
+	tan_vectors[2] = get_tangent(x, y, x-1, y, scale);
+	tan_vectors[3] = get_tangent(x, y, x, y-1, scale);
+	for (unsigned int i = 0; i < 4; i++) {
+		array<float, 3> new_norm = cloud_norm_vec(cloud_cross_prod(tan_vectors[i], tan_vectors[(i+1)%4]));
+		for (unsigned int j = 0; j < 3; j++) {
+			summed_norm[j] += new_norm[j];
+		}
+	}
+	return cloud_norm_vec(summed_norm);
 }
 
 void CloudGrid::set_size(const array<int, 4> new_size) {

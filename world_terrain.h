@@ -28,7 +28,7 @@ private:
 	void create_ground_vbo();
 	GLuint ground_vbo;
 	unsigned int ground_vbo_size;
-	void add_cloud_vertex(int, int, float *, float *);
+	void add_cloud_vertex(int, int, float *, float *, float *);
 
 
 public:

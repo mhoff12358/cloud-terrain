@@ -53,7 +53,8 @@ public:
 	float get_point(const int, const int);
 	void set_point(const int, const int, const float);
 	float get_height(const float, const float);
+	array<float, 3> get_tangent(const float, const float, const float, const float, const array<float, 2>&);
+	array<float, 3> get_normal(const int, const int, const array<float, 2>&);
 	array<int, 4> get_size();
 	void set_size(const array<int, 4>);
-	// void compute_cloud();
 };
