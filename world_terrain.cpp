@@ -59,9 +59,12 @@ void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * co
 	vertex_loc[0] = (float)x;
 	vertex_loc[1] = (float)y;
 	vertex_loc[2] = cg.get_point(x, y);
+	// color_loc[0] = 0;
+	// color_loc[1] = vertex_loc[2];
+	// color_loc[2] = 1-vertex_loc[2];
 	color_loc[0] = 0;
-	color_loc[1] = vertex_loc[2];
-	color_loc[2] = 1-vertex_loc[2];
+	color_loc[1] = 1.0/5.0;
+	color_loc[2] = 1.0/25.0;
 	array<float, 3> normal_vector = cg.get_normal(x, y, terrain_scale);
 	min_x = minthing(min_x, normal_vector[0]);
 	min_y = minthing(min_y, normal_vector[1]);
@@ -146,6 +149,7 @@ void WorldTerrain::draw_terrain() {
 	// out_44mat(promat, "Projection matrix:");
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
+	glUniform3f(glGetUniformLocation(game.get_state().get_ground_prog(), "sun_dir"), -1/pow(2,.5), 0, -1/pow(2,.5));
 	// std::cout << "GL ERROR: " << glGetError() << std::endl;
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);

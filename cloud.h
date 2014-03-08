@@ -27,10 +27,6 @@ private:
 	array<int, 4> cloud_size = {{0, 0, 0, 0}}; //Size is minx, miny, maxx, maxy
 	vector<vector<float>> cloud;
 
-public:
-	CloudGrid(const string, const float, const float);
-	CloudGrid(const float, const float);
-
 	hvt pointhash(const int32_t x, const int32_t y, const uint64_t mod);
 	hvt pointhash(const int32_t x, const int32_t y);
 	bool check_point(const int x, const int y);
@@ -43,12 +39,17 @@ public:
 	float height_finalize_fn(const int, const int, const float);
 	float height_add_fn(const float, const float);
 	float distance_fn(const float, const float, const float);
-
-	void write_cloud(const string);
-	void resize_cloud(const array<int, 4>);
+	
 	void generate_cloud();
 	void generate_cloud(const array<int, 4>);
 	void add_cloud(const int, const int, const array<int, 4>);
+
+public:
+	CloudGrid(const string, const float, const float);
+	CloudGrid(const float, const float);
+
+	void write_cloud(const string);
+	void resize_cloud(const array<int, 4>);
 
 	float get_point(const int, const int);
 	void set_point(const int, const int, const float);

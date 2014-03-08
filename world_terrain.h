@@ -19,7 +19,7 @@ class WorldTerrain {
 private:
 	Game& game;
 	CloudGrid cg = CloudGrid("bah", 0.01, 24.0);
-	const array<float, 2> terrain_scale = {{10, 100}};
+	const array<float, 2> terrain_scale = {{10, 700}};
 
 	void generate_stars(unsigned int);
 	float star_size = 0.08;

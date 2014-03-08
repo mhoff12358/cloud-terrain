@@ -83,6 +83,7 @@ void ViewState::create_shaders() {
 	ground_shad.link_program();
 	std::cout << "PROJ MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "proj_matrix") << std::endl;
 	std::cout << "VIEW MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "view_matrix") << std::endl;
+	std::cout << "SUN DIRECTION VAL: " << glGetUniformLocation(ground_shad.get_program(), "sun_direction") << std::endl;
 }
 
 GLuint ViewState::get_skybox_prog() {
