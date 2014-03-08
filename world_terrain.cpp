@@ -3,72 +3,30 @@
 
 void sphereVertex(float, float, float);
 
-GLuint triangleVBO;
-const float NUM_OF_VERTICES_IN_DATA=3;
-void stuff() {
-	float data[3][3] = {
-                                           {  0.0, 1.0, 0.0   },
-                                           { -1.0, -1.0, 0.0  },
-                                           {  1.0, -1.0, 0.0  }
-                                       };
-
-	glGenBuffers(1, &triangleVBO);
- 
-	/* Make the new VBO active */
-	glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-	 
-	/* Upload vertex data to the video device */
-	glBufferData(GL_ARRAY_BUFFER, NUM_OF_VERTICES_IN_DATA * 3 * sizeof(float), data, GL_STATIC_DRAW);
-	 
-	/* Specify that our coordinate data is going into attribute index 0(shaderAttribute), and contains three floats per vertex */
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	 
-	/* Enable attribute index 0(shaderAttribute) as being used */
-	glEnableVertexAttribArray(0);
-	 
-	/* Make the new VBO active. */
-	glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-}
-
-void stuff_draw(GLuint progno) {
-	glUseProgram(progno);
-
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-}
-
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
+	grid_size = array<int, 4>({{-100, -100, 100, 100}});
 }
 
 void WorldTerrain::initialize() {
-	cg.resize_cloud({{-100, -100, 100, 100}});
-	cg.write_cloud("terrain.txt");
+	world_grid.resize_cloud(grid_size);
+	world_grid.write_cloud("terrain.txt");
 
 	create_ground_vbo();
 
 	generate_stars(50);
 }
 
-float min_x;
-float min_y;
-float min_z;
-float minthing(float a, float b) {
-	return (a+b)/2;
-}
-
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
 	vertex_loc[0] = (float)x;
 	vertex_loc[1] = (float)y;
-	vertex_loc[2] = cg.get_point(x, y);
+	vertex_loc[2] = world_grid.get_point(x, y);
 	// color_loc[0] = 0;
 	// color_loc[1] = vertex_loc[2];
 	// color_loc[2] = 1-vertex_loc[2];
 	color_loc[0] = 0;
 	color_loc[1] = 1.0/5.0;
 	color_loc[2] = 1.0/25.0;
-	array<float, 3> normal_vector = cg.get_normal(x, y, terrain_scale);
-	min_x = minthing(min_x, normal_vector[0]);
-	min_y = minthing(min_y, normal_vector[1]);
-	min_z = minthing(min_z, normal_vector[2]);
+	array<float, 3> normal_vector = world_grid.get_normal(x, y, terrain_scale);
 	normal_loc[0] = normal_vector[0];
 	normal_loc[1] = normal_vector[1];
 	normal_loc[2] = normal_vector[2]; //Visually, the ground is scaled vertically by terrain_scale[1]/terrain_scale[0]
@@ -81,7 +39,7 @@ void WorldTerrain::create_ground_vbo() {
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 
-	array<int, 4> cloud_grid_size = cg.get_size();
+	array<int, 4> cloud_grid_size = grid_size;
 	unsigned int loc_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int col_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int nor_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
@@ -121,9 +79,6 @@ void WorldTerrain::create_ground_vbo() {
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 	delete[] cloud_data_buffer;
 
-	// stuff();
-	std::cout << "HI!: " << ground_vbo << " " << triangleVBO << std::endl;
-
 	std::cout << "Number of vertices being passed to draw arrays: " << ground_vbo_size << std::endl;
 }
 
@@ -159,24 +114,6 @@ void WorldTerrain::draw_terrain() {
 		std::cout << "GL ERROR: " << glGetError() << std::endl;
 	}
 	glPopMatrix();
-
-	// stuff_draw(game.get_state().get_ground_prog());
-
-	// std::cout << "GL ERROR: " << glGetError() << std::endl;
-	// glPushMatrix();
-	// glScalef(terrain_scale[0], terrain_scale[0], terrain_scale[1]);
-	// for (int x = cg.get_size()[0]; x < cg.get_size()[2]; x++) {
-	// 	glBegin(GL_TRIANGLE_STRIP);
-	// 	for (int y = cg.get_size()[1]; y+1 < cg.get_size()[3]; y++) {
-	// 		glColor3f(cg.get_point(x,y), 0.0f, 1-cg.get_point(x,y));
-	// 		glVertex3f((float)x, (float)y, cg.get_point(x,y));
-	// 		glColor3f(cg.get_point(x+1,y), 0.0f, 1-cg.get_point(x+1,y));
-	// 		glVertex3f((float)(x+1), (float)y, cg.get_point(x+1,y));
-	// 	}
-	// 	glEnd();
-	// }
-	// glPopMatrix();
-
 }
 
 void WorldTerrain::draw_skypbox() {
@@ -269,5 +206,5 @@ void WorldTerrain::generate_stars(unsigned int num_stars) {
 }
 
 float WorldTerrain::get_height(const float x, const float y) {
-	return cg.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
+	return world_grid.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
 }

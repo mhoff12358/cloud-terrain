@@ -62,7 +62,7 @@ uint64_t fasthash64(const void *buf, size_t len, uint64_t seed)
 	}
 
 	return mix(h);
-} 
+}
 
 CloudGrid::CloudGrid(const string seed_val, const float cloud_prob, const float max_rad) {
 	seed = seed_val;

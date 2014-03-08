@@ -12,11 +12,14 @@ EXE = main.exe
 
 all: $(EXE) cloud.exe
 
-$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o
-	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o $(LD_FLAGS) -o $@
+$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o
+	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o cloud.o $(LD_FLAGS) -o $@
 
 main.o: main.cpp main.h
 	$(COMPILER) $(COMPILER_FLAGS) main.cpp -o $@
+
+perlin_grid.o: perlin_grid.cpp perlin_grid.h
+	$(COMPILER) $(COMPILER_FLAGS) perlin_grid.cpp -o $@
 
 view_state.o: view_state.cpp view_state.h
 	$(COMPILER) $(COMPILER_FLAGS) view_state.cpp -o $@

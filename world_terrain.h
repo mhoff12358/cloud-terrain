@@ -18,9 +18,11 @@ class Game;
 class WorldTerrain {
 private:
 	Game& game;
-	CloudGrid cg = CloudGrid("bah", 0.01, 24.0);
-	const array<float, 2> terrain_scale = {{10, 700}};
+	array<int, 4> grid_size; //minx, miny, maxx, maxy
+	CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
 
+	const array<float, 2> terrain_scale = {{10, 700}};
+	
 	void generate_stars(unsigned int);
 	float star_size = 0.08;
 	vector<array<float, 2>> stars;
