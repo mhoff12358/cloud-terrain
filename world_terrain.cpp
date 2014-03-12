@@ -4,12 +4,12 @@
 void sphereVertex(float, float, float);
 
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
-	grid_size = array<int, 4>({{-100, -100, 100, 100}});
 }
 
 void WorldTerrain::initialize() {
-	world_grid.resize_cloud(grid_size);
-	world_grid.write_cloud("terrain.txt");
+	// world_grid.resize_cloud(grid_size);
+	// world_grid.write_cloud("terrain.txt");
+	world_grid.write_grid("terrain.txt");
 
 	create_ground_vbo();
 
@@ -17,16 +17,16 @@ void WorldTerrain::initialize() {
 }
 
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
-	vertex_loc[0] = (float)x;
-	vertex_loc[1] = (float)y;
-	vertex_loc[2] = world_grid.get_point(x, y);
+	vertex_loc[0] = (float)x*terrain_scale[0];
+	vertex_loc[1] = (float)y*terrain_scale[0];
+	vertex_loc[2] = world_grid.get_height(x*sample_scale, y*sample_scale)*terrain_scale[1];
 	// color_loc[0] = 0;
 	// color_loc[1] = vertex_loc[2];
 	// color_loc[2] = 1-vertex_loc[2];
 	color_loc[0] = 0;
 	color_loc[1] = 1.0/5.0;
 	color_loc[2] = 1.0/25.0;
-	array<float, 3> normal_vector = world_grid.get_normal(x, y, terrain_scale);
+	array<float, 3> normal_vector = world_grid.get_normal(x*sample_scale, y*sample_scale, terrain_scale);
 	normal_loc[0] = normal_vector[0];
 	normal_loc[1] = normal_vector[1];
 	normal_loc[2] = normal_vector[2]; //Visually, the ground is scaled vertically by terrain_scale[1]/terrain_scale[0]
@@ -97,14 +97,14 @@ void WorldTerrain::draw_terrain() {
 	glUseProgram(game.get_state().get_ground_prog());
 
 	glPushMatrix();
-	glScalef(terrain_scale[0], terrain_scale[0], terrain_scale[1]);
+	// glScalef(terrain_scale[0], terrain_scale[0], terrain_scale[1]);
 	GLfloat mvmat[16], promat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
 	// out_44mat(promat, "Projection matrix:");
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
-	glUniform3f(glGetUniformLocation(game.get_state().get_ground_prog(), "sun_dir"), -1/pow(2,.5), 0, -1/pow(2,.5));
+	glUniform3f(glGetUniformLocation(game.get_state().get_ground_prog(), "sun_dir"), sun_dir[0], sun_dir[1], sun_dir[2]);
 	// std::cout << "GL ERROR: " << glGetError() << std::endl;
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
@@ -206,5 +206,10 @@ void WorldTerrain::generate_stars(unsigned int num_stars) {
 }
 
 float WorldTerrain::get_height(const float x, const float y) {
-	return world_grid.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
+	// return 20.0;
+	return world_grid.get_height(x*sample_scale/terrain_scale[0], y*sample_scale/terrain_scale[0])*terrain_scale[1];
+}
+
+const float * WorldTerrain::get_scale() {
+	return terrain_scale.data();
 }

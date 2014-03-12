@@ -12,16 +12,21 @@
 #include <stdlib.h>
 
 #include "cloud.h"
+#include "perlin_grid.h"
 
 class Game;
 
 class WorldTerrain {
 private:
 	Game& game;
-	array<int, 4> grid_size; //minx, miny, maxx, maxy
-	CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
+	array<int, 4> grid_size = {{0, 0, 50, 50}}; //minx, miny, maxx, maxy
+	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
+	PerlinGrid world_grid = PerlinGrid(0);
 
-	const array<float, 2> terrain_scale = {{10, 700}};
+	const array<float, 2> terrain_scale = {{10, 100}};
+	const float sample_scale = .1;
+
+	array<float, 3>sun_dir = {{-1/pow(2, .5), 0, -1/pow(2, .5)}};
 	
 	void generate_stars(unsigned int);
 	float star_size = 0.08;
@@ -41,6 +46,7 @@ public:
 	void draw_terrain();
 	void draw_skypbox();
 	float get_height(const float, const float);
+	const float* get_scale();
 };
 
 #endif
