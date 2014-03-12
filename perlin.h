@@ -13,8 +13,6 @@
 #include <utility>
 #include <math.h>
 
-#define hvt unsigned int32_t
-
 using std::string;
 using std::hash;
 using std::list;
@@ -43,7 +41,7 @@ private:
 	float grid_value(float, float, unsigned int, unsigned int);
 	float compute_height(unsigned int x, unsigned int y, float, float); //x and y = [0, num_samples)
 	array<float, 3> vertex_normalize(array<float, 3>);
-	array<float, 3> compute_normal(unsigned int x, unsigned int y); //x and y = [0, num_samples)
+	array<float, 3> compute_normal(unsigned int x, unsigned int y, const array<float, 2>&); //x and y = [0, num_samples)
 
 	uint64_t fasthash64(const void*, size_t, uint64_t);
 	uint32_t pointhash(const uint32_t, const uint32_t, const uint64_t);
@@ -57,7 +55,7 @@ public:
 	//compute function and set the cache.
 	array<float, 2> get_gradient(unsigned int x, unsigned int y); //x and y = [0, frequency)
 	float get_height(unsigned int x, unsigned int y); //x and y = [0, num_samples)
-	array<float, 3> get_normal(unsigned int x, unsigned int y); //x and y = [0, num_samples)
+	array<float, 3> get_normal(unsigned int x, unsigned int y, const array<float, 2>&); //x and y = [0, num_samples)
 
 	void begin_caching(PNP_Cache_Id);
 	void stop_caching(PNP_Cache_Id);

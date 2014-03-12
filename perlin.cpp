@@ -78,8 +78,10 @@ float PerlinNoisePage::grid_value_interpolate(float a, float b, float s) {
 }
 
 float PerlinNoisePage::grid_value(float px, float py, unsigned int gx, unsigned int gy) { //Computes the contribution of a grid point
+	//g_ are the indices of the gradient that should be used
+	//p_ are the vector that points from the gradient point to x, y
 	array<float, 2> grad = get_gradient(gx, gy);
-	return grad[0]*(gx-px)+grad[1]*(gy-py);
+	return grad[0]*(px)+grad[1]*(py);
 }
 float PerlinNoisePage::compute_height(unsigned int x, unsigned int y, float pxo, float pyo) {
 	float px = (float)x/num_samples + pxo;
@@ -89,15 +91,15 @@ float PerlinNoisePage::compute_height(unsigned int x, unsigned int y, float pxo,
 	return grid_value_interpolate(
 		grid_value_interpolate(
 			grid_value(px, py, gx, gy),
-			grid_value(px, py, gx+1, gy),
-			px-gx
+			grid_value(-px, py, gx+1, gy),
+			px
 		),
 		grid_value_interpolate(
-			grid_value(px, py, gx, gy+1),
-			grid_value(px, py, gx+1, gy+1),
-			px-gx
+			grid_value(px, -py, gx, gy+1),
+			grid_value(-px, -py, gx+1, gy+1),
+			px
 		),
-		py-gy
+		py
 	);
 }
 
@@ -106,7 +108,7 @@ array<float, 3> PerlinNoisePage::vertex_normalize(array<float, 3> in_vert) {
 	return array<float, 3>({{in_vert[0]/mag, in_vert[1]/mag, in_vert[2]/mag}});
 }
 
-array<float, 3> PerlinNoisePage::compute_normal(unsigned int x, unsigned int y) {
+array<float, 3> PerlinNoisePage::compute_normal(unsigned int x, unsigned int y, const array<float, 2>& scale) {
 	float epsilon = 0.001;
 	float h = get_height(x, y);
 	float hx = compute_height(x, y, epsilon, 0);
@@ -140,15 +142,15 @@ float PerlinNoisePage::get_height(unsigned int x, unsigned int y) {
 	}
 }
 
-array<float, 3> PerlinNoisePage::get_normal(unsigned int x, unsigned int y) {
+array<float, 3> PerlinNoisePage::get_normal(unsigned int x, unsigned int y, const array<float, 2>& scale) {
 	if (cache_flag[PNP_GRADIENTS]) {
 		pair<bool, array<float, 3>>* cache_pointer = normal_cache+(y*(frequency+1))+x;
 		if (!cache_pointer->first) {
-			cache_pointer->second = compute_normal(x, y);
+			cache_pointer->second = compute_normal(x, y, scale);
 		}
 		return cache_pointer->second;
 	} else {
-		return compute_normal(x, y);
+		return compute_normal(x, y, scale);
 	}
 }
 

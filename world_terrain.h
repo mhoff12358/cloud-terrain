@@ -13,15 +13,16 @@
 
 #include "cloud.h"
 #include "perlin_grid.h"
+#include "perlin.h"
 
 class Game;
 
 class WorldTerrain {
 private:
 	Game& game;
-	array<int, 4> grid_size = {{0, 0, 50, 50}}; //minx, miny, maxx, maxy
+	array<int, 4> grid_size = {{0, 0, 128, 128}}; //minx, miny, maxx, maxy
 	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
-	PerlinGrid world_grid = PerlinGrid(0);
+	PerlinNoisePage world_grid = PerlinNoisePage(array<unsigned int, 2>({{0, 0}}), 128, 16);
 
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;
