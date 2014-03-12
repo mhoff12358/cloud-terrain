@@ -11,7 +11,7 @@
 #include <vector>
 #include <array>
 #include <utility>
-#include <math.h>
+#include <cmath>
 
 using std::string;
 using std::hash;

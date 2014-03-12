@@ -9,7 +9,7 @@ WorldTerrain::WorldTerrain(Game& g) : game(g) {
 void WorldTerrain::initialize() {
 	// world_grid.resize_cloud(grid_size);
 	// world_grid.write_cloud("terrain.txt");
-	// world_grid.write_grid("terrain.txt");
+	write_grid("terrain.txt");
 
 	create_ground_vbo();
 
@@ -214,4 +214,16 @@ float WorldTerrain::get_height(const float x, const float y) {
 
 const float * WorldTerrain::get_scale() {
 	return terrain_scale.data();
+}
+
+void WorldTerrain::write_grid(const string filename) {
+	std::ofstream ofile;
+	ofile.open(filename);
+	for (int x = grid_size[0]; x < grid_size[2]; x++) {
+		for (int y = grid_size[1]; y < grid_size[3]; y++) {
+			ofile << world_grid.get_height(x, y) << '|';
+		}
+		ofile << std::endl;
+	}
+	ofile.close();
 }

@@ -1,6 +1,13 @@
 
 #include "perlin.h"
 
+int perlin_mod(int a, int b) {
+	if (a < 0) {
+		return a%b;
+	}
+	return b+(a%b);
+}
+
 //Hashing/randomness nitty gritty stuff
 #define mix(h) ({					\
 			(h) ^= (h) >> 23;		\
@@ -49,6 +56,9 @@ uint32_t PerlinNoisePage::pointhash(const uint32_t x, const uint32_t y, const ui
 //Constructor/Destructor
 PerlinNoisePage::PerlinNoisePage(array<unsigned int, 2> p_o, unsigned int n_s, unsigned int freq):
 page_offset(p_o), num_samples(n_s), frequency(freq) {
+	begin_caching(PNP_GRADIENTS);
+	begin_caching(PNP_HEIGHTS);
+	begin_caching(PNP_NORMALS);
 }
 
 PerlinNoisePage::~PerlinNoisePage() {
@@ -84,19 +94,24 @@ float PerlinNoisePage::grid_value(float px, float py, unsigned int gx, unsigned 
 	return grad[0]*(px)+grad[1]*(py);
 }
 float PerlinNoisePage::compute_height(unsigned int x, unsigned int y, float pxo, float pyo) {
-	float px = (float)x/num_samples + pxo;
-	float py = (float)y/num_samples + pyo;
-	unsigned int gx = (int)(px*(frequency+1));
-	unsigned int gy = (int)(py*(frequency+1));
+	float px = ((float)x)* (frequency+1) / num_samples + pxo;
+	float py = ((float)y)* (frequency+1) / num_samples + pyo;
+	// float py = ((float)y)/ num_samples + pyo;
+	// float py = good_perlin_mod(y, ((float)num_samples)/frequency) * (float)frequency / (float)num_samples + pyo;
+	unsigned int gx = (int)px;
+	unsigned int gy = (int)py;
+	px -= gx;
+	py -= gy;
+	// std::cout << x << "\t" << y << "\t" << px << "\t" << py << std::endl; 
 	return grid_value_interpolate(
 		grid_value_interpolate(
 			grid_value(px, py, gx, gy),
-			grid_value(-px, py, gx+1, gy),
+			grid_value(1-px, py, gx+1, gy),
 			px
 		),
 		grid_value_interpolate(
-			grid_value(px, -py, gx, gy+1),
-			grid_value(-px, -py, gx+1, gy+1),
+			grid_value(px, 1-py, gx, gy+1),
+			grid_value(1-px, 1-py, gx+1, gy+1),
 			px
 		),
 		py
