@@ -12,7 +12,7 @@
 #include <array>
 #include <math.h>
 
-#define hvt uint32_t
+#include "perlin.h"
 
 using std::string;
 using std::hash;
@@ -22,31 +22,20 @@ using std::array;
 
 class PerlinGrid {
 private:
-	uint64_t seed;
+	unsigned int num_samples; //Number of samples per page of the grid
+	array<int, 4> page_indices = {{0, 0, 0, 0}}; //minx, miny, sizex, sizey
 
-	uint64_t fasthash64(const void *, size_t, uint64_t);
-	uint32_t hashfn(void *, size_t);
-	hvt pointhash(int32_t, int32_t, uint64_t);
+	PerlinNoisePage page_array[3][4][3];
 
-	float interpolate_weight_fn(float);
-	float interpolate_weight_fn_der(float);
-	float grid_value_interpolate(float, float, float);
-	float grid_value_interpolate_der(float, float, float);
-	float grid_value(float, float, float, float);
-
-	array<float, 2> point_gradient(int, int, uint64_t);
-
-	array<float, 3> vertex_normalize(array<float, 3>);
+	PerlinNoisePage& get_page(unsigned int x, unsigned int y, unsigned int z); //Page index of the page you want to get
 
 public:
-	PerlinGrid(const uint64_t);
+	PerlinGrid(array<int, 4>, unsigned int);
 
-	float get_height(const float, const float);
-	float get_point(const int, const int);
-	array<float, 3> get_tangent(const float, const float, const float, const float, const array<float, 2>&);
-	array<float, 3> get_normal(const float, const float, const array<float, 2>&);
+	void set_page_range(array<int, 4>);
 
-	void write_grid(const string);
+	float get_height(unsigned int x, unsigned int y);
+	array<float, 3> get_normal(unsigned int x, unsigned int y, const array<float, 2>&);
 };
 
 #endif

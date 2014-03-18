@@ -9,9 +9,11 @@ WorldTerrain::WorldTerrain(Game& g) : game(g) {
 void WorldTerrain::initialize() {
 	// world_grid.resize_cloud(grid_size);
 	// world_grid.write_cloud("terrain.txt");
-	write_grid("terrain.txt");
+	// write_grid("terrain.txt");
 
 	create_ground_vbo();
+	create_skybox_vbo();
+	std::cout << ground_vbo << "\t" << skybox_vbo << std::endl;
 
 	generate_stars(50);
 }
@@ -38,17 +40,14 @@ void WorldTerrain::create_ground_vbo() {
 	glGenBuffers(1, &ground_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
 
-	std::cout << "GL ERROR: " << glGetError() << std::endl;
-	std::cout << "GL ERROR: " << glGetError() << std::endl;
-
 	array<int, 4> cloud_grid_size = grid_size;
 	unsigned int loc_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int col_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int nor_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int number_squares = (cloud_grid_size[2]-cloud_grid_size[0])*(cloud_grid_size[3]-cloud_grid_size[1]);
-	unsigned int loc_vbo_size = loc_square_size * number_squares;
-	unsigned int col_vbo_size = col_square_size * number_squares;
-	unsigned int nor_vbo_size = nor_square_size * number_squares;
+	loc_vbo_size = loc_square_size * number_squares;
+	col_vbo_size = col_square_size * number_squares;
+	nor_vbo_size = nor_square_size * number_squares;
 	ground_vbo_size = loc_vbo_size + col_vbo_size + nor_vbo_size;
 	float * cloud_data_buffer = new float[ground_vbo_size];
 	float * vert_iter = cloud_data_buffer;
@@ -71,27 +70,51 @@ void WorldTerrain::create_ground_vbo() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*ground_vbo_size, cloud_data_buffer, GL_STATIC_DRAW);
 	std::cout << "Number of bytes in the buffer: " << sizeof(float)*ground_vbo_size << std::endl;
 
-	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);
-	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[1].first);
-	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*loc_vbo_size);
-	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[2].first);
-	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[2].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*(loc_vbo_size+col_vbo_size));
-
 	std::cout << "GL ERROR: " << glGetError() << std::endl;
 	delete[] cloud_data_buffer;
 
 	std::cout << "Number of vertices being passed to draw arrays: " << ground_vbo_size << std::endl;
 }
 
-void out_44mat(float * mat, const string & desc) {
-	if (desc.size() != 0) {
-		std::cout << desc.data() << std::endl;
-	}
-	std::cout << mat[0] << "\t" << mat[4] << "\t" << mat[8] << "\t" << mat[12] << "\t" << std::endl; 
-	std::cout << mat[1] << "\t" << mat[5] << "\t" << mat[9] << "\t" << mat[13] << "\t" << std::endl; 
-	std::cout << mat[2] << "\t" << mat[6] << "\t" << mat[10] << "\t" << mat[14] << "\t" << std::endl; 
-	std::cout << mat[3] << "\t" << mat[7] << "\t" << mat[11] << "\t" << mat[15] << "\t" << std::endl; 
+void WorldTerrain::create_skybox_vbo() {
+	glGenBuffers(1, &skybox_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, skybox_vbo);
+
+	float vertex_vals[24*3] = {0.5f, -0.5f, -0.5f //Front
+	-0.5f, -0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f, //Left
+	 0.5f, -0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f, //Back
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f, //Right
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f, //Top
+	-0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f, //Bottom
+	-0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f, -0.5f};
+	float skybox_data_buffer[6*4*(3+3)]; //6 sides, 4 vertices, 3 floats for position and 3 floats for color
+	memcpy(skybox_data_buffer, vertex_vals, 6*4*3*sizeof(float));
+
+	//Set all vertex colors to CORNFLOWER BLUE YEAAAAAAH
+	// for (float * sdb_ptr = skybox_data_buffer + 24*3; sdb_ptr != skybox_data_buffer + 24*6; sdb_ptr += 3) {
+	// 	sdb_ptr[0] = 100.0/255;
+	// 	sdb_ptr[1] = 149.0/255;
+	// 	sdb_ptr[2] = 237.0/255;
+	// }
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*6*4*6, skybox_data_buffer, GL_STATIC_DRAW);
 }
 
 void WorldTerrain::draw_terrain() {
@@ -103,14 +126,18 @@ void WorldTerrain::draw_terrain() {
 	GLfloat mvmat[16], promat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
-	// out_44mat(promat, "Projection matrix:");
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
 	glUniform3f(glGetUniformLocation(game.get_state().get_ground_prog(), "sun_dir"), sun_dir[0], sun_dir[1], sun_dir[2]);
-	// std::cout << "GL ERROR: " << glGetError() << std::endl;
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
-	glDrawArrays(GL_TRIANGLES, 0, ground_vbo_size/2);
+	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[1].first);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*loc_vbo_size);
+	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[2].first);
+	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[2].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*(loc_vbo_size+col_vbo_size));
+	glDrawArrays(GL_TRIANGLES, 0, loc_vbo_size);
 	error = glGetError();
 	if (error != 0) {
 		std::cout << "GL ERROR: " << glGetError() << std::endl;
@@ -122,71 +149,45 @@ void WorldTerrain::draw_skypbox() {
 	glUseProgram(game.get_state().get_skybox_prog());
 	GLint currprog;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currprog);
-	// std::cout << currprog << " " << game.get_state().get_skybox_prog() << std::endl;
 	glGetProgramiv(game.get_state().get_skybox_prog(), GL_ATTACHED_SHADERS, &currprog);
-	// std::cout << "Attached progs: " << currprog << std::endl;
+
+	glEnableVertexAttribArray(game.get_state().skybox_shad.shader_attributes[0].first);
+	glVertexAttribPointer(game.get_state().skybox_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(game.get_state().skybox_shad.shader_attributes[1].first);
+	glVertexAttribPointer(game.get_state().skybox_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*24*3);
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
 
+	glBindBuffer(GL_ARRAY_BUFFER, skybox_vbo);
+
 	//Sky!
-	glColor3f(100./255, 149./255, 237./255);
-	// glColor3f(0, 0, 0);
-	glBegin(GL_QUADS); //Front
-		glVertex3f( 0.5f, -0.5f, -0.5f);
-		glVertex3f(-0.5f, -0.5f, -0.5f);
-		glVertex3f(-0.5f,  0.5f, -0.5f);
-		glVertex3f( 0.5f,  0.5f, -0.5f);
-	glEnd();
-	glBegin(GL_QUADS); //Left
-		glVertex3f( 0.5f, -0.5f,  0.5f);
-		glVertex3f( 0.5f, -0.5f, -0.5f);
-		glVertex3f( 0.5f,  0.5f, -0.5f);
-		glVertex3f( 0.5f,  0.5f,  0.5f);
-	glEnd();
-	glBegin(GL_QUADS); //Back
-		glVertex3f(-0.5f, -0.5f,  0.5f);
-		glVertex3f( 0.5f, -0.5f,  0.5f);
-		glVertex3f( 0.5f,  0.5f,  0.5f);
-		glVertex3f(-0.5f,  0.5f,  0.5f);
-	glEnd();
-	glBegin(GL_QUADS); //Right
-		glVertex3f(-0.5f, -0.5f, -0.5f);
-		glVertex3f(-0.5f, -0.5f,  0.5f);
-		glVertex3f(-0.5f,  0.5f,  0.5f);
-		glVertex3f(-0.5f,  0.5f, -0.5f);
-	glEnd();
-	glBegin(GL_QUADS); //Top
-		glVertex3f(-0.5f,  0.5f, -0.5f);
-		glVertex3f(-0.5f,  0.5f,  0.5f);
-		glVertex3f( 0.5f,  0.5f,  0.5f);
-		glVertex3f( 0.5f,  0.5f, -0.5f);
-	glEnd();
-	glBegin(GL_QUADS); //Bottom
-		glVertex3f(-0.5f, -0.5f, -0.5f);
-		glVertex3f(-0.5f, -0.5f,  0.5f);
-		glVertex3f( 0.5f, -0.5f,  0.5f);
-		glVertex3f( 0.5f, -0.5f, -0.5f);
-	glEnd();
+	GLfloat mvmat[16], promat[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
+	glGetFloatv(GL_PROJECTION_MATRIX, promat);
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_skybox_prog(), "view_matrix"), 1, false, mvmat);
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_skybox_prog(), "proj_matrix"), 1, false, promat);
+
+	glDrawArrays(GL_QUADS, 0, 3);
 
 	//Stars!
-	float w = 1.0, h = 1.0;
-	glBindTexture(GL_TEXTURE_2D, game.get_state().grumptex);
-	for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glBegin(GL_QUADS);
-		glColor4f(1, 1, 1, 1);
-		glTexCoord2f(0, 0);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-		glTexCoord2f(w, 0);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-		glTexCoord2f(w, h);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-		glTexCoord2f(0, h);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-		glEnd();
-		glDisable(GL_TEXTURE_2D);
-	}
+	// float w = 1.0, h = 1.0;
+	// glBindTexture(GL_TEXTURE_2D, game.get_state().grumptex);
+	// for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
+	// 	glEnable(GL_TEXTURE_2D);
+	// 	glEnable(GL_BLEND);
+	// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// 	glBegin(GL_QUADS);
+	// 	glColor4f(1, 1, 1, 1);
+	// 	glTexCoord2f(0, 0);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+	// 	glTexCoord2f(w, 0);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+	// 	glTexCoord2f(w, h);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+	// 	glTexCoord2f(0, h);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+	// 	glEnd();
+	// 	glDisable(GL_TEXTURE_2D);
+	// }
 
 	glPopAttrib();
 }

@@ -22,7 +22,6 @@ private:
 	SDL_GLContext context;
 	std::string creation_errors;
 
-	ShaderProgram skybox_shad;
 
 public:
 	SDL_Window * get_window() {return window;};
@@ -51,6 +50,7 @@ public:
 	GLuint get_ground_prog();
 	
 	ShaderProgram ground_shad;
+	ShaderProgram skybox_shad;
 };
 
 #endif

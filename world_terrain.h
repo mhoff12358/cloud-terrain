@@ -22,13 +22,16 @@ private:
 	Game& game;
 	array<int, 4> grid_size = {{0, 0, 256, 256}}; //minx, miny, maxx, maxy
 	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
-	PerlinNoisePage world_grid = PerlinNoisePage(array<unsigned int, 2>({{0, 0}}), 256, 16);
+	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{0, 0, 3, 4}}), 256);
 
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;
 
 	array<float, 3>sun_dir = {{-1/pow(2, .5), 0, -1/pow(2, .5)}};
 	
+	void create_skybox_vbo();
+	GLuint skybox_vbo;
+
 	void generate_stars(unsigned int);
 	float star_size = 0.08;
 	vector<array<float, 2>> stars;
@@ -36,6 +39,9 @@ private:
 	void create_ground_vbo();
 	GLuint ground_vbo;
 	unsigned int ground_vbo_size;
+	unsigned int loc_vbo_size;
+	unsigned int col_vbo_size;
+	unsigned int nor_vbo_size;
 	void add_cloud_vertex(int, int, float *, float *, float *);
 
 

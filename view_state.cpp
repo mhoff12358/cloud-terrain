@@ -71,15 +71,19 @@ void ViewState::create_shaders() {
 	skybox_shad.create_program();
 	skybox_shad.add_shader(GL_VERTEX_SHADER, "skybox.vert");
 	skybox_shad.add_shader(GL_FRAGMENT_SHADER, "skybox.frag");
+	skybox_shad.add_attribute("in_position");
+	skybox_shad.add_attribute("in_color");
+	skybox_shad.add_attribute("frag_color");
 	skybox_shad.link_program();
 
 	ground_shad.create_program();
 	ground_shad.add_shader(GL_VERTEX_SHADER, "ground.vert");
 	ground_shad.add_shader(GL_FRAGMENT_SHADER, "ground.frag");
-	glBindFragDataLocation(ground_shad.get_program(), 0, "frag_color");
 	ground_shad.add_attribute("in_position");
 	ground_shad.add_attribute("in_color");
 	ground_shad.add_attribute("in_normal");
+	ground_shad.add_attribute("frag_color");
+	// glBindFragDataLocation(ground_shad.get_program(), 0, "frag_color");
 	ground_shad.link_program();
 	std::cout << "PROJ MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "proj_matrix") << std::endl;
 	std::cout << "VIEW MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "view_matrix") << std::endl;
