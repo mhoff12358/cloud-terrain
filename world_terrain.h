@@ -15,6 +15,8 @@
 #include "perlin_grid.h"
 #include "perlin.h"
 
+#define skybox_num_tri 36*3
+
 class Game;
 
 class WorldTerrain {
@@ -31,6 +33,9 @@ private:
 	
 	void create_skybox_vbo();
 	GLuint skybox_vbo;
+
+	void create_stars_vbo();
+	GLuint stars_vbo;
 
 	void generate_stars(unsigned int);
 	float star_size = 0.08;

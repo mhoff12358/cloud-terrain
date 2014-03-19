@@ -11,11 +11,11 @@ void WorldTerrain::initialize() {
 	// world_grid.write_cloud("terrain.txt");
 	// write_grid("terrain.txt");
 
+	generate_stars(50);
+
 	create_ground_vbo();
 	create_skybox_vbo();
-	std::cout << ground_vbo << "\t" << skybox_vbo << std::endl;
-
-	generate_stars(50);
+	// create_stars_vbo();
 }
 
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
@@ -70,7 +70,7 @@ void WorldTerrain::create_ground_vbo() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*ground_vbo_size, cloud_data_buffer, GL_STATIC_DRAW);
 	std::cout << "Number of bytes in the buffer: " << sizeof(float)*ground_vbo_size << std::endl;
 
-	std::cout << "GL ERROR: " << glGetError() << std::endl;
+	std::cout << "GL ERROR CREATE GROUND VBO: " << glGetError() << std::endl;
 	delete[] cloud_data_buffer;
 
 	std::cout << "Number of vertices being passed to draw arrays: " << ground_vbo_size << std::endl;
@@ -80,41 +80,102 @@ void WorldTerrain::create_skybox_vbo() {
 	glGenBuffers(1, &skybox_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, skybox_vbo);
 
-	float vertex_vals[24*3] = {0.5f, -0.5f, -0.5f //Front
-	-0.5f, -0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f, //Left
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f, //Back
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f, //Right
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f, //Top
-	-0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f, //Bottom
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f, -0.5f};
-	float skybox_data_buffer[6*4*(3+3)]; //6 sides, 4 vertices, 3 floats for position and 3 floats for color
-	memcpy(skybox_data_buffer, vertex_vals, 6*4*3*sizeof(float));
+	float vertex_vals[skybox_num_tri*3] =
+	{
+    -1.0f,-1.0f,-1.0f,
+    -1.0f,-1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f,-1.0f,-1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f,-1.0f,
+    1.0f, 1.0f,-1.0f,
+    -1.0f,-1.0f,-1.0f,
+    -1.0f, 1.0f,-1.0f,
+    1.0f, 1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    -1.0f,-1.0f,-1.0f,
+    1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f,-1.0f,
+    -1.0f, 1.0f,-1.0f,
+    1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f,-1.0f,
+    -1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f,-1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+	};
+	float skybox_data_buffer[skybox_num_tri*6]; //6 sides, 4 vertices, 3 floats for position and 3 floats for color
+	memcpy(skybox_data_buffer, vertex_vals, skybox_num_tri*3*sizeof(float));
 
 	//Set all vertex colors to CORNFLOWER BLUE YEAAAAAAH
-	// for (float * sdb_ptr = skybox_data_buffer + 24*3; sdb_ptr != skybox_data_buffer + 24*6; sdb_ptr += 3) {
-	// 	sdb_ptr[0] = 100.0/255;
-	// 	sdb_ptr[1] = 149.0/255;
-	// 	sdb_ptr[2] = 237.0/255;
+	for (float * sdb_ptr = skybox_data_buffer + skybox_num_tri*3; sdb_ptr != skybox_data_buffer + skybox_num_tri*6; sdb_ptr += 3) {
+		sdb_ptr[0] = 100.0/255;
+		sdb_ptr[1] = 149.0/255;
+		sdb_ptr[2] = 237.0/255;
+	}
+
+	//Makes each side of the skybox different for testing purposes
+	// float * sdb = skybox_data_buffer + skybox_num_tri*3;
+	// for (int i = 0; i < 6; i++) {
+	// 	sdb[i*3] = 1.0; sdb[i*3+1] = 0.0; sdb[i*3+2] = 0.0;
+	// 	sdb[i*3+3*6] = 0.0; sdb[i*3+1+3*6] = 1.0; sdb[i*3+2+3*6] = 0.0;
+	// 	sdb[i*3+3*12] = 0.0; sdb[i*3+1+3*12] = 0.0; sdb[i*3+2+3*12] = 1.0;
+	// 	sdb[i*3+3*18] = 1.0; sdb[i*3+1+3*18] = 1.0; sdb[i*3+2+3*18] = 0.0;
+	// 	sdb[i*3+3*24] = 1.0; sdb[i*3+1+3*24] = 0.0; sdb[i*3+2+3*24] = 1.0;
+	// 	sdb[i*3+3*30] = 0.0; sdb[i*3+1+3*30] = 1.0; sdb[i*3+2+3*30] = 1.0;
 	// }
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*6*4*6, skybox_data_buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*skybox_num_tri*6, skybox_data_buffer, GL_STATIC_DRAW);
+}
+
+// void sphereVertex(float theta, float phi, float radius) {
+// 	float x = cos(theta)*sin(phi)*radius;
+// 	float z = sin(theta)*sin(phi)*radius;
+// 	float y = cos(phi)*radius;
+// 	glVertex3f(x, y, z);
+// }
+
+void sphereVertex(float * store, float theta, float phi, float radius) {
+	store[0] = cos(theta)*sin(phi)*radius;
+	store[1] = sin(theta)*sin(phi)*radius;
+	store[2] = cos(phi)*radius;
+};
+
+void WorldTerrain::create_stars_vbo() {
+	glGenBuffers(1, &stars_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, stars_vbo);
+
+	unsigned int num_star_vertices = stars.size()*2*3; //each star is a
+	//"square" and so needs 2 triangles each with 3 vertices
+	float * stars_data_buffer = new float[num_star_vertices*3];
+
+	float * sdb_iter = stars_data_buffer;
+	for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
+		sphereVertex(sdb_iter, (*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+		sphereVertex(sdb_iter+3, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+		sphereVertex(sdb_iter+6, (*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+		sphereVertex(sdb_iter+9, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+		sdb_iter += 12;
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*num_star_vertices*3, stars_data_buffer, GL_STATIC_DRAW);
+
+	delete[] stars_data_buffer;
 }
 
 void WorldTerrain::draw_terrain() {
@@ -140,40 +201,66 @@ void WorldTerrain::draw_terrain() {
 	glDrawArrays(GL_TRIANGLES, 0, loc_vbo_size);
 	error = glGetError();
 	if (error != 0) {
-		std::cout << "GL ERROR: " << glGetError() << std::endl;
+		std::cout << "GL ERROR DRAWING TERRAIN: " << error << std::endl;
 	}
 	glPopMatrix();
 }
 
 void WorldTerrain::draw_skypbox() {
-	glUseProgram(game.get_state().get_skybox_prog());
-	GLint currprog;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &currprog);
-	glGetProgramiv(game.get_state().get_skybox_prog(), GL_ATTACHED_SHADERS, &currprog);
-
-	glEnableVertexAttribArray(game.get_state().skybox_shad.shader_attributes[0].first);
-	glVertexAttribPointer(game.get_state().skybox_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(game.get_state().skybox_shad.shader_attributes[1].first);
-	glVertexAttribPointer(game.get_state().skybox_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*24*3);
-
+	GLuint error;
+	//Set skybox attributes
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
 
-	glBindBuffer(GL_ARRAY_BUFFER, skybox_vbo);
-
-	//Sky!
+	//Load the matrices
 	GLfloat mvmat[16], promat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
+	GLint currprog;
+
+	//Sky!
+	glUseProgram(game.get_state().get_skybox_prog());
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currprog);
+	glGetProgramiv(game.get_state().get_skybox_prog(), GL_ATTACHED_SHADERS, &currprog);
+
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_skybox_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_skybox_prog(), "proj_matrix"), 1, false, promat);
 
-	glDrawArrays(GL_QUADS, 0, 3);
+	glBindBuffer(GL_ARRAY_BUFFER, skybox_vbo);
+	glEnableVertexAttribArray(game.get_state().skybox_shad.shader_attributes[0].first);
+	glVertexAttribPointer(game.get_state().skybox_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(game.get_state().skybox_shad.shader_attributes[1].first);
+	glVertexAttribPointer(game.get_state().skybox_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*skybox_num_tri*3);
+
+	glDrawArrays(GL_TRIANGLES, 0, skybox_num_tri*6);
+
+	error = glGetError();
+	if (error != 0) {
+		std::cout << "GL ERROR DRAWING SKYBOX: " << error << std::endl;
+	}
 
 	//Stars!
+	// glUseProgram(game.get_state().get_stars_prog());
+	// glGetIntegerv(GL_CURRENT_PROGRAM, &currprog);
+	// glGetProgramiv(game.get_state().get_stars_prog(), GL_ATTACHED_SHADERS, &currprog);
+
+	// glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_skybox_prog(), "view_matrix"), 1, false, mvmat);
+	// glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_skybox_prog(), "proj_matrix"), 1, false, promat);
+
+	// glBindBuffer(GL_ARRAY_BUFFER, stars_vbo);
+	// glEnableVertexAttribArray(game.get_state().stars_shad.shader_attributes[0].first);
+	// glVertexAttribPointer(game.get_state().stars_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	// glDrawArrays(GL_TRIANGLES, 0, stars.size()*6);
+
+	error = glGetError();
+	if (error != 0) {
+		std::cout << "GL ERROR DRAWING STARS: " << error << std::endl;
+	}
 	// float w = 1.0, h = 1.0;
+	// glColor3f(1.0, 1.0, 1.0);
 	// glBindTexture(GL_TEXTURE_2D, game.get_state().grumptex);
 	// for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
 	// 	glEnable(GL_TEXTURE_2D);
@@ -189,14 +276,8 @@ void WorldTerrain::draw_skypbox() {
 	// 	glDisable(GL_TEXTURE_2D);
 	// }
 
+	//Unset the attributes
 	glPopAttrib();
-}
-
-void sphereVertex(float theta, float phi, float radius) {
-	float x = cos(theta)*sin(phi)*radius;
-	float z = sin(theta)*sin(phi)*radius;
-	float y = cos(phi)*radius;
-	glVertex3f(x, y, z);
 }
 
 void WorldTerrain::generate_stars(unsigned int num_stars) {

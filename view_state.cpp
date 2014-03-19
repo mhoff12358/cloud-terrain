@@ -75,6 +75,8 @@ void ViewState::create_shaders() {
 	skybox_shad.add_attribute("in_color");
 	skybox_shad.add_attribute("frag_color");
 	skybox_shad.link_program();
+	std::cout << "IN POSITION LOC: " << glGetAttribLocation(skybox_shad.get_program(), "in_position") << std::endl;
+	std::cout << "IN COLOR LOC: " << glGetAttribLocation(skybox_shad.get_program(), "in_color") << std::endl;
 
 	ground_shad.create_program();
 	ground_shad.add_shader(GL_VERTEX_SHADER, "ground.vert");
@@ -88,6 +90,12 @@ void ViewState::create_shaders() {
 	std::cout << "PROJ MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "proj_matrix") << std::endl;
 	std::cout << "VIEW MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "view_matrix") << std::endl;
 	std::cout << "SUN DIRECTION VAL: " << glGetUniformLocation(ground_shad.get_program(), "sun_direction") << std::endl;
+
+	stars_shad.create_program();
+	stars_shad.add_shader(GL_VERTEX_SHADER, "stars.vert");
+	stars_shad.add_shader(GL_FRAGMENT_SHADER, "stars.frag");
+	stars_shad.add_attribute("in_position");
+	stars_shad.link_program();
 }
 
 GLuint ViewState::get_skybox_prog() {
@@ -96,6 +104,10 @@ GLuint ViewState::get_skybox_prog() {
 
 GLuint ViewState::get_ground_prog() {
 	return ground_shad.get_program();
+}
+
+GLuint ViewState::get_stars_prog() {
+	return stars_shad.get_program();
 }
 
 int ViewState::check_valid() {

@@ -48,9 +48,11 @@ public:
 
 	GLuint get_skybox_prog();
 	GLuint get_ground_prog();
+	GLuint get_stars_prog();
 	
 	ShaderProgram ground_shad;
 	ShaderProgram skybox_shad;
+	ShaderProgram stars_shad;
 };
 
 #endif
