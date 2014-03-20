@@ -38,7 +38,7 @@ private:
 	GLuint stars_vbo;
 
 	void generate_stars(unsigned int);
-	float star_size = 0.08;
+	float star_size = 0.01;
 	vector<array<float, 2>> stars;
 
 	void create_ground_vbo();
