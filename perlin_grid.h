@@ -25,7 +25,7 @@ private:
 	unsigned int num_samples; //Number of samples per page of the grid
 	array<int, 4> page_indices = {{0, 0, 0, 0}}; //minx, miny, sizex, sizey
 
-	PerlinNoisePage page_array[3][4][3];
+	PerlinNoisePage page_array[4][4][3];
 
 	PerlinNoisePage& get_page(unsigned int x, unsigned int y, unsigned int z); //Page index of the page you want to get
 
@@ -34,7 +34,8 @@ public:
 
 	void set_page_range(array<int, 4>);
 
-	float get_height(unsigned int x, unsigned int y);
+	float get_height(int x, int y);
+	float get_height(float x, float y);
 	array<float, 3> get_normal(unsigned int x, unsigned int y, const array<float, 2>&);
 };
 

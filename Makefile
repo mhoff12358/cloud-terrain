@@ -12,8 +12,8 @@ EXE = main.exe
 
 all: $(EXE) cloud.exe
 
-$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o
-	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o cloud.o $(LD_FLAGS) -o $@
+$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o my_math.o
+	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o my_math.o cloud.o $(LD_FLAGS) -o $@
 
 main.o: main.cpp main.h
 	$(COMPILER) $(COMPILER_FLAGS) main.cpp -o $@
@@ -41,6 +41,9 @@ game_logic.o: game_logic.cpp game_logic.h
 
 shader.o: shader.cpp shader.h
 	$(COMPILER) $(COMPILER_FLAGS) shader.cpp -o $@
+
+my_math.o: my_math.cpp my_math.h
+	$(COMPILER) $(COMPILER_FLAGS) my_math.cpp -o $@
 
 cloud.exe: cloud.o cloud_example.cpp
 	$(COMPILER) cloud_example.cpp cloud.o $(LD_FLAGS) -o $@

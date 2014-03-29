@@ -21,15 +21,11 @@ void WorldTerrain::initialize() {
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
 	vertex_loc[0] = (float)x*terrain_scale[0];
 	vertex_loc[1] = (float)y*terrain_scale[0];
-	// vertex_loc[2] = world_grid.get_height(x*sample_scale, y*sample_scale)*terrain_scale[1];
+	// vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
 	vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
-	// color_loc[0] = 0;
-	// color_loc[1] = vertex_loc[2];
-	// color_loc[2] = 1-vertex_loc[2];
 	color_loc[0] = 0;
 	color_loc[1] = 1.0/5.0;
 	color_loc[2] = 1.0/25.0;
-	// array<float, 3> normal_vector = world_grid.get_normal(x*sample_scale, y*sample_scale, terrain_scale);
 	array<float, 3> normal_vector = world_grid.get_normal(x, y, terrain_scale);
 	normal_loc[0] = normal_vector[0];
 	normal_loc[1] = normal_vector[1];
@@ -53,8 +49,8 @@ void WorldTerrain::create_ground_vbo() {
 	float * vert_iter = cloud_data_buffer;
 	float * color_iter = cloud_data_buffer+(loc_vbo_size);
 	float * norm_iter = cloud_data_buffer+(loc_vbo_size+col_vbo_size);
-	for (int y = cloud_grid_size[1]; y < cloud_grid_size[3]; y++) {
-		for (int x = cloud_grid_size[0]; x < cloud_grid_size[2]; x++) {
+	for (int y = cloud_grid_size[1]; y < cloud_grid_size[3]-1; y++) {
+		for (int x = cloud_grid_size[0]; x < cloud_grid_size[2]-1; x++) {
 			add_cloud_vertex(x  , y  , vert_iter+3*0, color_iter+3*0, norm_iter+3*0);
 			add_cloud_vertex(x  , y+1, vert_iter+3*1, color_iter+3*1, norm_iter+3*1);
 			add_cloud_vertex(x+1, y  , vert_iter+3*2, color_iter+3*2, norm_iter+3*2);
@@ -160,22 +156,24 @@ void WorldTerrain::create_stars_vbo() {
 	glGenBuffers(1, &stars_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, stars_vbo);
 
-	unsigned int num_star_vertices = stars.size()*2*3; //each star is a
+	unsigned int num_star_vertices = stars.size(); //each star is a
 	//"square" and so needs 2 triangles each with 3 vertices
 	float * stars_data_buffer = new float[num_star_vertices*3];
 
 	float * sdb_iter = stars_data_buffer;
 	for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
-		sphereVertex(sdb_iter, (*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-		sphereVertex(sdb_iter+3, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-		sphereVertex(sdb_iter+6, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-		sphereVertex(sdb_iter+9, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-		sphereVertex(sdb_iter+12, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-		sphereVertex(sdb_iter+15, (*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-		sdb_iter += 18;
+		sphereVertex(sdb_iter, (*s)[0], (*s)[1], 1.0);
+		sdb_iter += 3;
+	// 	sphereVertex(sdb_iter, (*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+	// 	sphereVertex(sdb_iter+3, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+	// 	sphereVertex(sdb_iter+6, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+	// 	sphereVertex(sdb_iter+9, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+	// 	sphereVertex(sdb_iter+12, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
+	// 	sphereVertex(sdb_iter+15, (*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
+	// 	sdb_iter += 18;
 	}
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*num_star_vertices*3, stars_data_buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*num_star_vertices, stars_data_buffer, GL_STATIC_DRAW);
 
 	delete[] stars_data_buffer;
 }
@@ -255,7 +253,8 @@ void WorldTerrain::draw_skypbox() {
 	glEnableVertexAttribArray(game.get_state().stars_shad.shader_attributes[0].first);
 	glVertexAttribPointer(game.get_state().stars_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	
-	glDrawArrays(GL_TRIANGLES, 0, stars.size()*6);
+	glPointSize(10);
+	glDrawArrays(GL_POINTS, 0, stars.size());
 
 	error = glGetError();
 	if (error != 0) {
@@ -293,7 +292,7 @@ void WorldTerrain::generate_stars(unsigned int num_stars) {
 
 float WorldTerrain::get_height(const float x, const float y) {
 	return 20.0;
-	// return world_grid.get_height(x*sample_scale/terrain_scale[0], y*sample_scale/terrain_scale[0])*terrain_scale[1];
+	// return world_grid.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
 }
 
 const float * WorldTerrain::get_scale() {

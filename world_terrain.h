@@ -24,7 +24,7 @@ private:
 	Game& game;
 	array<int, 4> grid_size = {{0, 0, 256, 256}}; //minx, miny, maxx, maxy
 	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
-	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{0, 0, 3, 4}}), 256);
+	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{0, 0, 4, 4}}), 64);
 
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;
@@ -48,7 +48,6 @@ private:
 	unsigned int col_vbo_size;
 	unsigned int nor_vbo_size;
 	void add_cloud_vertex(int, int, float *, float *, float *);
-
 
 public:
 	WorldTerrain(Game& g);

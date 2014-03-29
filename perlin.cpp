@@ -85,6 +85,8 @@ void PerlinNoisePage::cache_none() {
 
 //Actual computation
 array<float, 2> PerlinNoisePage::compute_gradient(unsigned int x, unsigned int y) {
+	assert (x <= frequency);
+	assert (y <= frequency);
 	x = page_offset[0]*frequency + x;
 	y = page_offset[1]*frequency + y;
 	array<float, 2> retval = array<float, 2>({{
@@ -99,6 +101,7 @@ float PerlinNoisePage::interpolate_weight_fn(float s) {
 }
 
 float PerlinNoisePage::grid_value_interpolate(float a, float b, float s) {
+	assert (s >= 0 && s <= 1);
 	float scale = interpolate_weight_fn(s);
 	return (1-scale)*a+(scale)*b;
 }
@@ -109,26 +112,65 @@ float PerlinNoisePage::grid_value(float px, float py, unsigned int gx, unsigned 
 	array<float, 2> grad = get_gradient(gx, gy);
 	return grad[0]*(px)+grad[1]*(py);
 }
-float PerlinNoisePage::compute_height(unsigned int x, unsigned int y, float pxo, float pyo) {
-	float px = ((float)x)* (frequency+1) / num_samples + pxo;
-	float py = ((float)y)* (frequency+1) / num_samples + pyo;
-	unsigned int gx = (int)px;
-	unsigned int gy = (int)py;
-	px -= gx;
+
+float PerlinNoisePage::raw_compute_height(float x, float y) {
+	float px = x * frequency;
+	float py = y * frequency;
+	unsigned int gx = (unsigned int)px; //These should be gradient indeces
+	unsigned int gy = (unsigned int)py;
+	px -= gx; //Now these should be proportions between gradients
 	py -= gy;
-	return grid_value_interpolate(
-		grid_value_interpolate(
-			grid_value(px, py, gx, gy),
-			grid_value(px-1, py, gx+1, gy),
-			px
-		),
-		grid_value_interpolate(
-			grid_value(px, py-1, gx, gy+1),
-			grid_value(px-1, py-1, gx+1, gy+1),
-			px
-		),
-		py
-	);
+
+	assert (gx < frequency);
+	assert (gy < frequency);
+	assert (0 <= px && px <= 1);
+	assert (0 <= py && py <= 1);
+
+	// float retval = grid_value_interpolate(
+	// 	grid_value_interpolate(
+	// 		grid_value(px, py, gx, gy),
+	// 		grid_value(px-1, py, gx+1, gy),
+	// 		px
+	// 	),
+	// 	grid_value_interpolate(
+	// 		grid_value(px, py-1, gx, gy+1),
+	// 		grid_value(px-1, py-1, gx+1, gy+1),
+	// 		px
+	// 	),
+	// 	py
+	// );
+	// return retval;
+	return lerp(lerp(grid_value(px, py, gx, gy),
+		             grid_value(px-1, py, gx+1, gy),
+		             interpolate_weight_fn(px)),
+	            lerp(grid_value(px, py-1, gx, gy+1),
+	            	 grid_value(px-1, py-1, gx+1, gy+1),
+	            	 interpolate_weight_fn(px)),
+	            interpolate_weight_fn(py));
+}
+
+float PerlinNoisePage::finalize_height(float height, float x, float y) {
+	return get_amplitude(x, y)*height;
+}
+
+float PerlinNoisePage::compute_height(unsigned int x, unsigned int y, float pxo, float pyo) {
+	//x and y should be in the range [0,num_samples)
+	//pxo and pyo should be in the range [0,1)
+	//thus x+pxo should be in the range [0,num_samples)
+	//thus (x+pxo)/num_samples should be the proportion through the page.
+	//At this point the use of simple integer x and y values for easy caching
+	//is no longer necessary so they can be turned into fractions on the range
+	//[0, 1) by doing (x+pxo)/num_samples
+	assert (x < num_samples); // x in [0, num_samples)
+	assert (y < num_samples);
+	assert (pxo >= 0 && pxo <= 1); // pxo is a fraction
+	assert (pyo >= 0 && pyo <= 1); // pxo is a fraction
+
+	float pro_x = (((float)x)+pxo)/num_samples;
+	float pro_y = (((float)y)+pyo)/num_samples;
+	assert (0 <= pro_x && pro_x <= 1);
+	assert (0 <= pro_y && pro_y <= 1);
+	return finalize_height(raw_compute_height(pro_x, pro_y), pro_x, pro_y);
 }
 
 array<float, 3> PerlinNoisePage::vertex_normalize(array<float, 3> in_vert) {
@@ -142,7 +184,6 @@ array<float, 3> PerlinNoisePage::compute_normal(unsigned int x, unsigned int y, 
 	float hx = compute_height(x, y, epsilon, 0);
 	float hy = compute_height(x, y, 0, epsilon);
 	return vertex_normalize(array<float, 3>({{-epsilon*(hx-h), -epsilon*(hy-h), epsilon*epsilon}}));
-
 }
 
 //Outward interface
@@ -168,6 +209,10 @@ float PerlinNoisePage::get_height(unsigned int x, unsigned int y) {
 	} else {
 		return compute_height(x, y, 0, 0);
 	}
+}
+
+float PerlinNoisePage::get_height(unsigned int x, unsigned int y, float pxo, float pyo) {
+	return compute_height(x, y, pxo, pyo);
 }
 
 array<float, 3> PerlinNoisePage::get_normal(unsigned int x, unsigned int y, const array<float, 2>& scale) {
@@ -208,4 +253,65 @@ void PerlinNoisePage::stop_caching(PNP_Cache_Id cache_id) {
 			delete[] normal_cache;
 		}
 	}
+}
+
+//The perlin page needs to have its value field outward facing
+float PerlinNoisePage::get_amplitude(float x, float y) {
+	float retval = amps.get_amplitude(x, y);
+	// std::cout << retval << "\t";
+	return retval;
+}
+
+void PerlinNoisePage::set_amp_field(float * amp_values, unsigned int new_size) {
+	amps.set_size(new_size);
+	amps.assign_field(amp_values);
+}
+
+//Onto the Perlin Value Field
+PerlinValueField::PerlinValueField() {
+	set_size(0);
+}
+
+PerlinValueField::PerlinValueField(unsigned int new_size) {
+	set_size(new_size);
+}
+
+void PerlinValueField::assign_field(float * values) {
+	memcpy(amplitudes.data(), values, sizeof(float)*size*size);
+}
+
+void PerlinValueField::assign_field(unsigned int x, unsigned int y, float val) {
+	amplitudes[size*x+y] = val;
+}
+
+unsigned int PerlinValueField::get_size() {
+	return size;
+}
+
+void PerlinValueField::set_size(unsigned int new_size) {
+	size = new_size;
+	amplitudes.resize(size*size);
+}
+
+float PerlinValueField::get_raw_amplitude(int x, int y) {
+	if (x < (int)size && y < (int)size) {
+		return amplitudes.at(size*x+y);
+	} else {
+		return 0;
+	}
+}
+
+float PerlinValueField::get_amplitude(float x, float y) {
+	//x and y are what proportion through the whole of the value field the
+	//requested point is. They should be constrained by [0,1]
+	x *= size-1;
+	y *= size-1;
+	int xind = (int)floor(x);
+	float xpart = x - xind;
+	int yind = (int)floor(y);
+	float ypart = y - yind;
+
+	//Now we've got the indices and the interpolation proportions
+	return lerp(lerp(get_raw_amplitude(xind, yind), get_raw_amplitude(xind+1, yind), xpart),
+                lerp(get_raw_amplitude(xind, yind+1), get_raw_amplitude(xind+1, yind+1), xpart), ypart);
 }
