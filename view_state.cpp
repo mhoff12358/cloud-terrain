@@ -68,16 +68,6 @@ void ViewState::create_GL_context() {
 }
 
 void ViewState::create_shaders() {
-	skybox_shad.create_program();
-	skybox_shad.add_shader(GL_VERTEX_SHADER, "skybox.vert");
-	skybox_shad.add_shader(GL_FRAGMENT_SHADER, "skybox.frag");
-	skybox_shad.add_attribute("in_position");
-	skybox_shad.add_attribute("in_color");
-	skybox_shad.add_attribute("frag_color");
-	skybox_shad.link_program();
-	std::cout << "IN POSITION LOC: " << glGetAttribLocation(skybox_shad.get_program(), "in_position") << std::endl;
-	std::cout << "IN COLOR LOC: " << glGetAttribLocation(skybox_shad.get_program(), "in_color") << std::endl;
-
 	ground_shad.create_program();
 	ground_shad.add_shader(GL_VERTEX_SHADER, "ground.vert");
 	ground_shad.add_shader(GL_FRAGMENT_SHADER, "ground.frag");
@@ -90,6 +80,23 @@ void ViewState::create_shaders() {
 	std::cout << "PROJ MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "proj_matrix") << std::endl;
 	std::cout << "VIEW MATRIX VAL: " << glGetUniformLocation(ground_shad.get_program(), "view_matrix") << std::endl;
 	std::cout << "SUN DIRECTION VAL: " << glGetUniformLocation(ground_shad.get_program(), "sun_direction") << std::endl;
+
+	ocean_shad.create_program();
+	ocean_shad.add_shader(GL_VERTEX_SHADER, "ocean.vert");
+	ocean_shad.add_shader(GL_FRAGMENT_SHADER, "ocean.frag");
+	ocean_shad.add_attribute("in_position");
+	ocean_shad.add_attribute("frag_color");
+	ocean_shad.link_program();
+
+	skybox_shad.create_program();
+	skybox_shad.add_shader(GL_VERTEX_SHADER, "skybox.vert");
+	skybox_shad.add_shader(GL_FRAGMENT_SHADER, "skybox.frag");
+	skybox_shad.add_attribute("in_position");
+	skybox_shad.add_attribute("in_color");
+	skybox_shad.add_attribute("frag_color");
+	skybox_shad.link_program();
+	std::cout << "IN POSITION LOC: " << glGetAttribLocation(skybox_shad.get_program(), "in_position") << std::endl;
+	std::cout << "IN COLOR LOC: " << glGetAttribLocation(skybox_shad.get_program(), "in_color") << std::endl;
 
 	stars_shad.create_program();
 	stars_shad.add_shader(GL_VERTEX_SHADER, "stars.vert");
@@ -104,6 +111,10 @@ GLuint ViewState::get_skybox_prog() {
 
 GLuint ViewState::get_ground_prog() {
 	return ground_shad.get_program();
+}
+
+GLuint ViewState::get_ocean_prog() {
+	return ocean_shad.get_program();
 }
 
 GLuint ViewState::get_stars_prog() {

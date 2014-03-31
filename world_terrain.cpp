@@ -14,8 +14,21 @@ void WorldTerrain::initialize() {
 	generate_stars(50);
 
 	create_ground_vbo();
+	create_ocean_vbo();
 	create_skybox_vbo();
 	create_stars_vbo();
+}
+
+void WorldTerrain::position_sun(float curr_time) {
+	sun_dir[0] = cos(curr_time/2.0);
+	sun_dir[1] = sin(curr_time/2.0);
+	if (sun_dir[1] < 0) {
+		sun_dir[0] = 0;
+		sun_dir[1] = 0;
+		ambient_brightness = 0.25;
+	} else {
+		ambient_brightness = 0.5;
+	}
 }
 
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
@@ -69,6 +82,26 @@ void WorldTerrain::create_ground_vbo() {
 	delete[] cloud_data_buffer;
 
 	std::cout << "Number of vertices being passed to draw arrays: " << ground_vbo_size << std::endl;
+}
+
+void WorldTerrain::create_ocean_vbo() {
+	glGenBuffers(1, &ocean_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, ocean_vbo);
+
+	float radius_thing = (float)grid_size[2]*terrain_scale[0];
+	float ocean_data_buffer[6*3] = 
+	{
+		-radius_thing, -radius_thing, 0.0f,
+		 radius_thing,  radius_thing, 0.0f,
+		-radius_thing,  radius_thing, 0.0f,
+		-radius_thing, -radius_thing, 0.0f,
+		 radius_thing, -radius_thing, 0.0f,
+		 radius_thing,  radius_thing, 0.0f,
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*ocean_vbo_size, ocean_data_buffer, GL_STATIC_DRAW);
+
+	std::cout << "GL ERROR CREATE OCEAN VBO: " << glGetError() << std::endl;
 }
 
 void WorldTerrain::create_skybox_vbo() {
@@ -186,9 +219,11 @@ void WorldTerrain::draw_terrain() {
 	GLfloat mvmat[16], promat[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
+
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
 	glUniform3f(glGetUniformLocation(game.get_state().get_ground_prog(), "sun_dir"), sun_dir[0], sun_dir[1], sun_dir[2]);
+	glUniform1f(glGetUniformLocation(game.get_state().get_ground_prog(), "ambient"), ambient_brightness);
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
 	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);
@@ -197,11 +232,26 @@ void WorldTerrain::draw_terrain() {
 	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[1].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*loc_vbo_size);
 	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[2].first);
 	glVertexAttribPointer(game.get_state().ground_shad.shader_attributes[2].first, 3, GL_FLOAT, GL_FALSE, 0, (char*)NULL+sizeof(float)*(loc_vbo_size+col_vbo_size));
-	glDrawArrays(GL_TRIANGLES, 0, loc_vbo_size);
+	glDrawArrays(GL_TRIANGLES, 0, loc_vbo_size/3);
 	error = glGetError();
 	if (error != 0) {
 		std::cout << "GL ERROR DRAWING TERRAIN: " << error << std::endl;
 	}
+
+	glUseProgram(game.get_state().get_ocean_prog());
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ocean_prog(), "view_matrix"), 1, false, mvmat);
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ocean_prog(), "proj_matrix"), 1, false, promat);
+	glUniform1f(glGetUniformLocation(game.get_state().get_ocean_prog(), "water_level"), 0.0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, ocean_vbo);
+	glEnableVertexAttribArray(game.get_state().ocean_shad.shader_attributes[0].first);
+	glVertexAttribPointer(game.get_state().ocean_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glDrawArrays(GL_TRIANGLES, 0, ocean_vbo_size);
+	error = glGetError();
+	if (error != 0) {
+		std::cout << "GL ERROR DRAWING OCEAN: " << error << std::endl;
+	}
+	
 	glPopMatrix();
 }
 

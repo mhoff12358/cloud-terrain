@@ -31,12 +31,15 @@ private:
 	const float sample_scale = .1;
 
 	array<float, 3>sun_dir = {{-1/pow(2, .5), 0, -1/pow(2, .5)}};
+	float ambient_brightness = 0.5;
 	
 	void create_skybox_vbo();
 	GLuint skybox_vbo;
 
 	void create_stars_vbo();
 	GLuint stars_vbo;
+	GLuint sun_vbo;
+	unsigned int sun_vbo_size = 6*3;
 
 	void generate_stars(unsigned int);
 	float star_size = 0.01;
@@ -50,6 +53,10 @@ private:
 	unsigned int nor_vbo_size;
 	void add_cloud_vertex(int, int, float *, float *, float *);
 
+	void create_ocean_vbo();
+	GLuint ocean_vbo;
+	unsigned int ocean_vbo_size = 6*3;
+
 public:
 	WorldTerrain(Game& g);
 
@@ -60,6 +67,8 @@ public:
 	float get_height(const float, const float);
 	float get_height(const float, const float, const float);
 	const float* get_scale();
+
+	void position_sun(float);
 
 	void write_grid(const string);
 };
