@@ -13,6 +13,7 @@
 #include <math.h>
 
 #include "perlin.h"
+#include "my_math.h"
 
 using std::string;
 using std::hash;
@@ -27,7 +28,7 @@ private:
 
 	PerlinNoisePage page_array[4][4][3];
 
-	PerlinNoisePage& get_page(unsigned int x, unsigned int y, unsigned int z); //Page index of the page you want to get
+	PerlinNoisePage& get_page(int x, int y, int z); //Page index of the page you want to get
 
 public:
 	PerlinGrid(array<int, 4>, unsigned int);
@@ -36,7 +37,8 @@ public:
 
 	float get_height(int x, int y);
 	float get_height(float x, float y);
-	array<float, 3> get_normal(unsigned int x, unsigned int y, const array<float, 2>&);
+	float get_height_interp(float x, float y);
+	array<float, 3> get_normal(int x, int y, const array<float, 2>&);
 };
 
 #endif

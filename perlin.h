@@ -24,7 +24,7 @@ using std::vector;
 using std::array;
 using std::pair;
 
-enum PNP_Cache_Id {PNP_GRADIENTS = 0, PNP_HEIGHTS = 0, PNP_NORMALS = 0};
+enum PNP_Cache_Id {PNP_GRADIENTS = 0, PNP_HEIGHTS = 1, PNP_NORMALS = 2};
 
 class PerlinValueField {
 private:
@@ -47,7 +47,7 @@ public:
 
 class PerlinNoisePage {
 private:
-	array<unsigned int, 2> page_offset = {{0, 0}};
+	array<int, 2> page_offset = {{0, 0}};
 	unsigned int num_samples = 0;
 	unsigned int frequency = 0;
 	
@@ -68,17 +68,16 @@ private:
 	float grid_value(float, float, unsigned int, unsigned int);
 	float raw_compute_height(float, float); //x and y = [0, 1)
 	float compute_height(unsigned int x, unsigned int y, float, float); //x and y = [0, num_samples)
-	array<float, 3> vertex_normalize(array<float, 3>);
 	array<float, 3> compute_normal(unsigned int x, unsigned int y, const array<float, 2>&); //x and y = [0, num_samples)
 
 	uint64_t fasthash64(const void*, size_t, uint64_t);
-	uint32_t pointhash(const uint32_t, const uint32_t, const uint64_t);
+	uint32_t pointhash(const int32_t, const int32_t, const uint64_t);
 
 	array<float, 2> get_gradient(unsigned int x, unsigned int y); //x and y = [0, frequency)
 
 public:
 	PerlinNoisePage();
-	PerlinNoisePage(array<unsigned int, 2>, unsigned int, unsigned int);
+	PerlinNoisePage(array<int, 2>, unsigned int, unsigned int);
 	~PerlinNoisePage();
 
 	//The get functions are how this program gets its values. First they check
@@ -93,7 +92,7 @@ public:
 	void cache_all();
 	void cache_none();
 
-	void set_values(array<unsigned int, 2>, unsigned int, unsigned int);
+	void set_values(array<int, 2>, unsigned int, unsigned int);
 	void set_amp_field(float *, unsigned int);
 	float get_amplitude(float x, float y);
 };

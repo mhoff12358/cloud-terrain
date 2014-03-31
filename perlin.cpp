@@ -46,7 +46,7 @@ uint64_t PerlinNoisePage::fasthash64(const void *buf, size_t len, uint64_t seed)
 	return mix(h);
 }
 
-uint32_t PerlinNoisePage::pointhash(const uint32_t x, const uint32_t y, const uint64_t mod) {
+uint32_t PerlinNoisePage::pointhash(const int32_t x, const int32_t y, const uint64_t mod) {
 	int64_t data = x;
 	data += (int64_t)y << 32;
 	uint32_t retval = fasthash64(&data, 8, mod);
@@ -56,7 +56,7 @@ uint32_t PerlinNoisePage::pointhash(const uint32_t x, const uint32_t y, const ui
 //Constructor/Destructor
 PerlinNoisePage::PerlinNoisePage() {}
 
-PerlinNoisePage::PerlinNoisePage(array<unsigned int, 2> p_o, unsigned int n_s, unsigned int freq):
+PerlinNoisePage::PerlinNoisePage(array<int, 2> p_o, unsigned int n_s, unsigned int freq):
 page_offset(p_o), num_samples(n_s), frequency(freq) {
 	cache_all();
 }
@@ -65,7 +65,7 @@ PerlinNoisePage::~PerlinNoisePage() {
 	cache_none();
 }
 
-void PerlinNoisePage::set_values(array<unsigned int, 2> p_o, unsigned int n_s, unsigned int freq) {
+void PerlinNoisePage::set_values(array<int, 2> p_o, unsigned int n_s, unsigned int freq) {
 	page_offset = p_o;
 	num_samples = n_s;
 	frequency = freq;
@@ -87,11 +87,12 @@ void PerlinNoisePage::cache_none() {
 array<float, 2> PerlinNoisePage::compute_gradient(unsigned int x, unsigned int y) {
 	assert (x <= frequency);
 	assert (y <= frequency);
-	x = page_offset[0]*frequency + x;
-	y = page_offset[1]*frequency + y;
+	int totalx = page_offset[0]*frequency + x;
+	int totaly = page_offset[1]*frequency + y;
+	// std::cout << page_offset[0] << "\t" << x << "\t" << page_offset[1] << "\t" << y << "\t" << totalx << "\t" << totaly << std::endl;
 	array<float, 2> retval = array<float, 2>({{
-		(float)pointhash(x, y, frequency)/(float)(uint32_t)(-1)*2-1,
-		(float)pointhash(x, y, frequency ^ (uint64_t)1<<63)/(float)(uint32_t)(-1)*2-1
+		(float)pointhash(totalx, totaly, frequency)/(float)(uint32_t)(-1)*2-1,
+		(float)pointhash(totalx, totaly, frequency ^ (uint64_t)1<<63)/(float)(uint32_t)(-1)*2-1
 	}});
 	return retval;
 }
@@ -173,10 +174,6 @@ float PerlinNoisePage::compute_height(unsigned int x, unsigned int y, float pxo,
 	return finalize_height(raw_compute_height(pro_x, pro_y), pro_x, pro_y);
 }
 
-array<float, 3> PerlinNoisePage::vertex_normalize(array<float, 3> in_vert) {
-	float mag = pow(pow(in_vert[0], 2) + pow(in_vert[1], 2) + pow(in_vert[2], 2), 0.5);
-	return array<float, 3>({{in_vert[0]/mag, in_vert[1]/mag, in_vert[2]/mag}});
-}
 
 array<float, 3> PerlinNoisePage::compute_normal(unsigned int x, unsigned int y, const array<float, 2>& scale) {
 	float epsilon = 0.001;
@@ -188,26 +185,36 @@ array<float, 3> PerlinNoisePage::compute_normal(unsigned int x, unsigned int y, 
 
 //Outward interface
 array<float, 2> PerlinNoisePage::get_gradient(unsigned int x, unsigned int y) {
-	if (cache_flag[PNP_GRADIENTS]) {
-		pair<bool, array<float, 2>>* cache_pointer = gradient_cache+(y*(frequency+1))+x;
-		if (!cache_pointer->first) {
-			cache_pointer->second = compute_gradient(x, y);
+	if (x < num_samples && y < num_samples) {
+		if (cache_flag[PNP_GRADIENTS]) {
+			pair<bool, array<float, 2>>* cache_pointer = gradient_cache+(y*(frequency+1))+x;
+			if (!cache_pointer->first) {
+				cache_pointer->second = compute_gradient(x, y);
+			}
+			return cache_pointer->second;
+		} else {
+			return compute_gradient(x, y);
 		}
-		return cache_pointer->second;
 	} else {
-		return compute_gradient(x, y);
+		std::cout << "GET GRADIENT FAILURE: x: " << x << "\ty: " << y << std::endl;
+		return array<float, 2>({{1.0, 0.0}});
 	}
 }
 
 float PerlinNoisePage::get_height(unsigned int x, unsigned int y) {
-	if (cache_flag[PNP_GRADIENTS]) {
-		pair<bool, float>* cache_pointer = height_cache+(y*num_samples)+x;
-		if (!cache_pointer->first) {
-			cache_pointer->second = compute_height(x, y, 0, 0);
+	if (x < num_samples && y < num_samples) {
+		if (cache_flag[PNP_GRADIENTS]) {
+			pair<bool, float>* cache_pointer = height_cache+(y*num_samples)+x;
+			if (!cache_pointer->first) {
+				cache_pointer->second = compute_height(x, y, 0, 0);
+			}
+			return cache_pointer->second;
+		} else {
+			return compute_height(x, y, 0, 0);
 		}
-		return cache_pointer->second;
 	} else {
-		return compute_height(x, y, 0, 0);
+		std::cout << "GET HEIGHT FAILURE: x: " << x << "\ty: " << y << std::endl;
+		return 0.0;
 	}
 }
 
@@ -228,29 +235,37 @@ array<float, 3> PerlinNoisePage::get_normal(unsigned int x, unsigned int y, cons
 }
 
 void PerlinNoisePage::begin_caching(PNP_Cache_Id cache_id) {
+	// std::cout << "Beginning to cache" << std::endl;
 	unsigned int num_vals;
 	if (!cache_flag[cache_id]) {
 		if (cache_id == PNP_GRADIENTS) {
 			num_vals = (frequency+1)*(frequency+1);
 			gradient_cache = new pair<bool, array<float, 2>>[num_vals];
+			cache_flag[cache_id] = true;
 		} else if (cache_id == PNP_HEIGHTS) {
 			num_vals = (num_samples)*(num_samples);
 			height_cache = new pair<bool, float>[num_vals];
+			cache_flag[cache_id] = true;
 		} else if (cache_id == PNP_NORMALS) {
 			num_vals = (num_samples)*(num_samples);
 			normal_cache = new pair<bool, array<float, 3>>[num_vals];
+			cache_flag[cache_id] = true;
 		}
 	}
 }
 
 void PerlinNoisePage::stop_caching(PNP_Cache_Id cache_id) {
+	// std::cout << "Ceasing to cache" << std::endl;
 	if (cache_flag[cache_id]) {
 		if (cache_id == PNP_GRADIENTS) {
 			delete[] gradient_cache;
+			cache_flag[cache_id] = false;
 		} else if (cache_id == PNP_HEIGHTS) {
 			delete[] height_cache;
+			cache_flag[cache_id] = false;
 		} else if (cache_id == PNP_NORMALS) {
 			delete[] normal_cache;
+			cache_flag[cache_id] = false;
 		}
 	}
 }

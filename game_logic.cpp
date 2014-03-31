@@ -37,7 +37,7 @@ void GameLogic::update_world() {
 		}
 	}
 	if (moved) {
-		player_loc[2] = game.get_terrain().get_height(player_loc[0], player_loc[1])+.06*game.get_terrain().get_scale()[1];
+		player_loc[2] = game.get_terrain().get_height(player_loc[0], player_loc[1], 0.06f);
 	}
 }
 

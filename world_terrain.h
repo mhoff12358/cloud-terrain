@@ -14,6 +14,7 @@
 #include "cloud.h"
 #include "perlin_grid.h"
 #include "perlin.h"
+#include "my_math.h"
 
 #define skybox_num_tri 36*3
 
@@ -22,9 +23,9 @@ class Game;
 class WorldTerrain {
 private:
 	Game& game;
-	array<int, 4> grid_size = {{0, 0, 256, 256}}; //minx, miny, maxx, maxy
+	array<int, 4> grid_size = {{-128, -128, 128, 128}}; //minx, miny, maxx, maxy
 	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
-	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{0, 0, 4, 4}}), 64);
+	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{-2, -2, 2, 2}}), 64);
 
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;
@@ -57,6 +58,7 @@ public:
 	void draw_terrain();
 	void draw_skypbox();
 	float get_height(const float, const float);
+	float get_height(const float, const float, const float);
 	const float* get_scale();
 
 	void write_grid(const string);

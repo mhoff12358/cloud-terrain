@@ -21,11 +21,10 @@ void WorldTerrain::initialize() {
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
 	vertex_loc[0] = (float)x*terrain_scale[0];
 	vertex_loc[1] = (float)y*terrain_scale[0];
-	// vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
 	vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
-	color_loc[0] = 0;
-	color_loc[1] = 1.0/5.0;
-	color_loc[2] = 1.0/25.0;
+	color_loc[0] = 172.0/255.0+17.0/255.0*randf(-1.0, 1.0);
+	color_loc[1] = 172.0/255.0+10.0/255.0*randf(-1.0, 1.0);
+	color_loc[2] = 93.0/255.0+5.0/255.0*randf(-1.0, 1.0);
 	array<float, 3> normal_vector = world_grid.get_normal(x, y, terrain_scale);
 	normal_loc[0] = normal_vector[0];
 	normal_loc[1] = normal_vector[1];
@@ -291,7 +290,12 @@ void WorldTerrain::generate_stars(unsigned int num_stars) {
 }
 
 float WorldTerrain::get_height(const float x, const float y) {
-	return 20.0;
+	return get_height(x, y, 0.0f);
+}
+
+float WorldTerrain::get_height(const float x, const float y, const float zoff) {
+	// return 20.0;
+	return (world_grid.get_height_interp(x/terrain_scale[0], y/terrain_scale[0])+zoff)*terrain_scale[1];
 	// return world_grid.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
 }
 
