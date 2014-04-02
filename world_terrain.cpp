@@ -20,12 +20,13 @@ void WorldTerrain::initialize() {
 }
 
 void WorldTerrain::position_sun(float curr_time) {
-	sun_dir[0] = cos(curr_time/2.0);
-	sun_dir[1] = sin(curr_time/2.0);
-	if (sun_dir[1] < 0) {
+	sun_angle = curr_time/8.0;
+	sun_dir[0] = -cos(sun_angle);
+	sun_dir[1] = -sin(sun_angle);
+	if (sun_dir[1] > 0) {
 		sun_dir[0] = 0;
 		sun_dir[1] = 0;
-		ambient_brightness = 0.25;
+		ambient_brightness = 0.1;
 	} else {
 		ambient_brightness = 0.5;
 	}
@@ -196,18 +197,25 @@ void WorldTerrain::create_stars_vbo() {
 	for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
 		sphereVertex(sdb_iter, (*s)[0], (*s)[1], 1.0);
 		sdb_iter += 3;
-	// 	sphereVertex(sdb_iter, (*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-	// 	sphereVertex(sdb_iter+3, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-	// 	sphereVertex(sdb_iter+6, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-	// 	sphereVertex(sdb_iter+9, (*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-	// 	sphereVertex(sdb_iter+12, (*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-	// 	sphereVertex(sdb_iter+15, (*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-	// 	sdb_iter += 18;
 	}
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*num_star_vertices, stars_data_buffer, GL_STATIC_DRAW);
 
 	delete[] stars_data_buffer;
+
+	glGenBuffers(1, &sun_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, sun_vbo);
+
+	float sun_data_buffer[6*3] = {
+		1.0, -0.1, -0.1,
+		1.0,  0.1,  0.1,
+		1.0, -0.1,  0.1,
+		1.0, -0.1, -0.1,
+		1.0,  0.1, -0.1,
+		1.0,  0.1,  0.1,
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*sun_vbo_size, sun_data_buffer, GL_STATIC_DRAW);
 }
 
 void WorldTerrain::draw_terrain() {
@@ -309,22 +317,30 @@ void WorldTerrain::draw_skypbox() {
 	if (error != 0) {
 		std::cout << "GL ERROR DRAWING STARS: " << error << std::endl;
 	}
-	// float w = 1.0, h = 1.0;
-	// glColor3f(1.0, 1.0, 1.0);
-	// glBindTexture(GL_TEXTURE_2D, game.get_state().grumptex);
-	// for (vector<array<float, 2>>::const_iterator s = stars.cbegin(); s != stars.cend(); s++) {
-	// 	glEnable(GL_TEXTURE_2D);
-	// 	glEnable(GL_BLEND);
-	// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// 	glBegin(GL_QUADS);
-	// 	glColor4f(1, 1, 1, 1);
-	// 	glTexCoord2f(0, 0);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-	// 	glTexCoord2f(w, 0);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]-star_size)), (*s)[1]-star_size, 1.0);
-	// 	glTexCoord2f(w, h);  sphereVertex((*s)[0]+(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-	// 	glTexCoord2f(0, h);  sphereVertex((*s)[0]-(star_size/sin((*s)[1]+star_size)), (*s)[1]+star_size, 1.0);
-	// 	glEnd();
-	// 	glDisable(GL_TEXTURE_2D);
-	// }
+
+	//Sun!
+	glPushMatrix();
+	glRotatef(sun_angle*180/M_PI, 0, 0, 1);
+	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
+	glGetFloatv(GL_PROJECTION_MATRIX, promat);
+	glUseProgram(game.get_state().get_sun_prog());
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currprog);
+	glGetProgramiv(game.get_state().get_sun_prog(), GL_ATTACHED_SHADERS, &currprog);
+
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_sun_prog(), "view_matrix"), 1, false, mvmat);
+	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_sun_prog(), "proj_matrix"), 1, false, promat);
+
+	glBindBuffer(GL_ARRAY_BUFFER, sun_vbo);
+	glEnableVertexAttribArray(game.get_state().sun_shad.shader_attributes[0].first);
+	glVertexAttribPointer(game.get_state().sun_shad.shader_attributes[0].first, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	error = glGetError();
+	if (error != 0) {
+		std::cout << "GL ERROR DRAWING SUN: " << error << std::endl;
+	}
+	glPopMatrix();
 
 	//Unset the attributes
 	glPopAttrib();

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <cmath>
 #include <stdlib.h>
 
 #include "cloud.h"
@@ -17,6 +18,7 @@
 #include "my_math.h"
 
 #define skybox_num_tri 36*3
+#define _USE_MATH_DEFINES
 
 class Game;
 
@@ -32,6 +34,7 @@ private:
 
 	array<float, 3>sun_dir = {{-1/pow(2, .5), 0, -1/pow(2, .5)}};
 	float ambient_brightness = 0.5;
+	float sun_angle = 0.0;
 	
 	void create_skybox_vbo();
 	GLuint skybox_vbo;

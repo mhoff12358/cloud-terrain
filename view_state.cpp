@@ -103,6 +103,12 @@ void ViewState::create_shaders() {
 	stars_shad.add_shader(GL_FRAGMENT_SHADER, "stars.frag");
 	stars_shad.add_attribute("in_position");
 	stars_shad.link_program();
+
+	sun_shad.create_program();
+	sun_shad.add_shader(GL_VERTEX_SHADER, "sun.vert");
+	sun_shad.add_shader(GL_FRAGMENT_SHADER, "sun.frag");
+	sun_shad.add_attribute("in_position");
+	sun_shad.link_program();
 }
 
 GLuint ViewState::get_skybox_prog() {
@@ -119,6 +125,10 @@ GLuint ViewState::get_ocean_prog() {
 
 GLuint ViewState::get_stars_prog() {
 	return stars_shad.get_program();
+}
+
+GLuint ViewState::get_sun_prog() {
+	return sun_shad.get_program();
 }
 
 int ViewState::check_valid() {

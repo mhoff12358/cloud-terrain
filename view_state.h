@@ -49,11 +49,13 @@ public:
 	GLuint get_skybox_prog();
 	GLuint get_ground_prog();
 	GLuint get_stars_prog();
+	GLuint get_sun_prog();
 	GLuint get_ocean_prog();
 	
 	ShaderProgram ground_shad;
 	ShaderProgram skybox_shad;
 	ShaderProgram stars_shad;
+	ShaderProgram sun_shad;
 	ShaderProgram ocean_shad;
 };
 
