@@ -219,6 +219,9 @@ void WorldTerrain::create_stars_vbo() {
 }
 
 void WorldTerrain::draw_terrain() {
+	//Rotate the model matrix so that the z axis is "up" on the screen and y is into the screen.
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+
 	GLuint error;
 	glUseProgram(game.get_state().get_ground_prog());
 
