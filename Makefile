@@ -10,7 +10,7 @@ LD_FLAGS = -lmingw32 -mwindows -mconsole -std=c++11 $(GL_LIB) $(SDL_LIB)
 
 EXE = main.exe
 
-all: $(EXE) cloud.exe
+all: $(EXE) cloud.exe terrain_writer_test.exe
 
 $(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o my_math.o
 	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o my_math.o cloud.o $(LD_FLAGS) -o $@
@@ -50,6 +50,12 @@ cloud.exe: cloud.o cloud_example.cpp
 
 cloud.o: cloud.cpp cloud.h
 	$(COMPILER) $(COMPILER_FLAGS) cloud.cpp -O2 -o $@
+
+terrain_writer_test.exe: terrain_writer.o terrain_writer_test.cpp
+	$(COMPILER) terrain_writer_test.cpp terrain_writer.o $(LD_FLAGS) -o $@
+
+terrain_writer.o: terrain_writer.cpp terrain_writer.h
+	$(COMPILER) $(COMPILER_FLAGS) terrain_writer.cpp -o $@
 
 clean:
 	rm *.o
