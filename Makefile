@@ -51,11 +51,17 @@ cloud.exe: cloud.o cloud_example.cpp
 cloud.o: cloud.cpp cloud.h
 	$(COMPILER) $(COMPILER_FLAGS) cloud.cpp -O2 -o $@
 
-terrain_writer_test.exe: terrain_writer.o terrain_writer_test.cpp
-	$(COMPILER) terrain_writer_test.cpp terrain_writer.o $(LD_FLAGS) -o $@
+terrain_writer_test.exe: terrain_writer.o terrain_map.o terrain_writer_test.cpp
+	$(COMPILER) terrain_writer_test.cpp terrain_map.o terrain_generator.o terrain_writer.o $(LD_FLAGS) -o $@
 
-terrain_writer.o: terrain_writer.cpp terrain_writer.h
+terrain_generator.o: terrain_generator.cpp terrain_generator.h terrain_point.h
+	$(COMPILER) $(COMPILER_FLAGS) terrain_generator.cpp -o $@
+
+terrain_writer.o: terrain_writer.cpp terrain_writer.h terrain_point.h
 	$(COMPILER) $(COMPILER_FLAGS) terrain_writer.cpp -o $@
+
+terrain_map.o: terrain_map.cpp terrain_map.h terrain_point.h terrain_writer.o terrain_generator.o
+	$(COMPILER) $(COMPILER_FLAGS) terrain_map.cpp -o $@
 
 clean:
 	rm *.o
