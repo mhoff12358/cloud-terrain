@@ -14,6 +14,9 @@ public:
 
 	TerrainPoint& getPoint(std::array<int, 2> point_index);
 
+	void savePoints();
+	void loadPoints();
+
 private:
 	TerrainGenerator* generator;
 	TerrainWriter* writer;

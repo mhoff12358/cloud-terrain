@@ -11,3 +11,11 @@ TerrainPoint& TerrainMap::getPoint(std::array<int, 2> point_index) {
 	}
 	return found_point->second;
 }
+
+void TerrainMap::savePoints() {
+	writer->writeAllPointsToFile(point_map);
+}
+
+void TerrainMap::loadPoints() {
+	writer->readAllPointsFromFile(point_map);
+}

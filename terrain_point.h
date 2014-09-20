@@ -1,4 +1,6 @@
 
+#include <array>
+
 #ifndef __TERRAIN_POINT_H_INCLUDED__
 #define __TERRAIN_POINT_H_INCLUDED__
 
@@ -12,7 +14,5 @@ public:
 
 	static int write_size;
 };
-
-int TerrainPoint::write_size = sizeof(float)+sizeof(float)*3;
 
 #endif

@@ -12,8 +12,8 @@ EXE = main.exe
 
 all: $(EXE) cloud.exe terrain_writer_test.exe
 
-$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o my_math.o
-	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o my_math.o cloud.o $(LD_FLAGS) -o $@
+$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o my_math.o terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o
+	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o my_math.o terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o cloud.o $(LD_FLAGS) -o $@
 
 main.o: main.cpp main.h
 	$(COMPILER) $(COMPILER_FLAGS) main.cpp -o $@
@@ -51,14 +51,17 @@ cloud.exe: cloud.o cloud_example.cpp
 cloud.o: cloud.cpp cloud.h
 	$(COMPILER) $(COMPILER_FLAGS) cloud.cpp -O2 -o $@
 
-terrain_writer_test.exe: terrain_writer.o terrain_map.o terrain_writer_test.cpp
-	$(COMPILER) terrain_writer_test.cpp terrain_map.o terrain_generator.o terrain_writer.o $(LD_FLAGS) -o $@
+terrain_writer_test.exe: terrain_writer.o terrain_map.o terrain_generator.o terrain_point.o terrain_writer_test.cpp
+	$(COMPILER) terrain_writer_test.cpp terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o $(LD_FLAGS) -o $@
 
 terrain_generator.o: terrain_generator.cpp terrain_generator.h terrain_point.h
 	$(COMPILER) $(COMPILER_FLAGS) terrain_generator.cpp -o $@
 
 terrain_writer.o: terrain_writer.cpp terrain_writer.h terrain_point.h
 	$(COMPILER) $(COMPILER_FLAGS) terrain_writer.cpp -o $@
+
+terrain_point.o: terrain_point.cpp terrain_point.h
+	$(COMPILER) $(COMPILER_FLAGS) terrain_point.cpp -o $@
 
 terrain_map.o: terrain_map.cpp terrain_map.h terrain_point.h terrain_writer.o terrain_generator.o
 	$(COMPILER) $(COMPILER_FLAGS) terrain_map.cpp -o $@
