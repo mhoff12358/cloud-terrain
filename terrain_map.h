@@ -10,12 +10,17 @@
 
 class TerrainMap {
 public:
+	TerrainMap() {};
 	TerrainMap(TerrainGenerator* tg, TerrainWriter* tw) : generator(tg), writer(tw) {};
 
 	TerrainPoint& getPoint(std::array<int, 2> point_index);
+	TerrainPoint getInterpolatedPoint(std::array<float, 2> point_coords);
 
 	void savePoints();
 	void loadPoints();
+
+	void setGenerator(TerrainGenerator* g);
+	void setWriter(TerrainWriter* w);
 
 private:
 	TerrainGenerator* generator;

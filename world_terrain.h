@@ -17,6 +17,10 @@
 #include "perlin.h"
 #include "my_math.h"
 
+#include "terrain_writer.h"
+#include "terrain_map.h"
+#include "simplex_generator.h"
+
 #define skybox_num_tri 36*3
 #define _USE_MATH_DEFINES
 
@@ -28,6 +32,9 @@ private:
 	array<int, 4> grid_size = {{-128, -128, 128, 128}}; //minx, miny, maxx, maxy
 	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
 	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{-2, -2, 2, 2}}), 64);
+	SimplexGenerator generator;
+	TerrainWriter writer;
+	TerrainMap world_map;
 
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;

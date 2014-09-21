@@ -4,6 +4,8 @@
 void sphereVertex(float, float, float);
 
 WorldTerrain::WorldTerrain(Game& g) : game(g) {
+	world_map.setGenerator(&generator);
+	world_map.setWriter(&writer);
 }
 
 void WorldTerrain::initialize() {
@@ -33,9 +35,11 @@ void WorldTerrain::position_sun(float curr_time) {
 }
 
 void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
+	TerrainPoint& vertex_point = world_map.getPoint({{x, y}});
 	vertex_loc[0] = (float)x*terrain_scale[0];
 	vertex_loc[1] = (float)y*terrain_scale[0];
-	vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
+	vertex_loc[2] = vertex_point.height;
+	// vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
 	color_loc[0] = 172.0/255.0+17.0/255.0*randf(-1.0, 1.0);
 	color_loc[1] = 172.0/255.0+10.0/255.0*randf(-1.0, 1.0);
 	color_loc[2] = 93.0/255.0+5.0/255.0*randf(-1.0, 1.0);
@@ -364,7 +368,9 @@ float WorldTerrain::get_height(const float x, const float y) {
 
 float WorldTerrain::get_height(const float x, const float y, const float zoff) {
 	// return 20.0;
-	return (world_grid.get_height_interp(x/terrain_scale[0], y/terrain_scale[0])+zoff)*terrain_scale[1];
+	TerrainPoint player_point = world_map.getInterpolatedPoint({{x/terrain_scale[0], y/terrain_scale[0]}});
+	return player_point.height+zoff;
+	// return (world_grid.get_height_interp(x/terrain_scale[0], y/terrain_scale[0])+zoff)*terrain_scale[1];
 	// return world_grid.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
 }
 

@@ -12,8 +12,8 @@ EXE = main.exe
 
 all: $(EXE) cloud.exe terrain_writer_test.exe
 
-$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o my_math.o terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o
-	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o my_math.o terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o cloud.o $(LD_FLAGS) -o $@
+$(EXE): main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o cloud.o perlin_grid.o perlin.o my_math.o terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o simplex_generator.o
+	$(COMPILER) main.o view_state.o view_drawer.o io_controller.o world_terrain.o game_logic.o shader.o perlin_grid.o perlin.o my_math.o terrain_map.o terrain_generator.o terrain_writer.o terrain_point.o simplex_generator.o cloud.o $(LD_FLAGS) -o $@
 
 main.o: main.cpp main.h
 	$(COMPILER) $(COMPILER_FLAGS) main.cpp -o $@
@@ -65,6 +65,9 @@ terrain_point.o: terrain_point.cpp terrain_point.h
 
 terrain_map.o: terrain_map.cpp terrain_map.h terrain_point.h terrain_writer.o terrain_generator.o
 	$(COMPILER) $(COMPILER_FLAGS) terrain_map.cpp -o $@
+
+simplex_generator.o: simplex_generator.cpp simplex_generator.h
+	$(COMPILER) $(COMPILER_FLAGS) simplex_generator.cpp -o $@
 
 clean:
 	rm *.o

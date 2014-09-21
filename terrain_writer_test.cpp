@@ -6,6 +6,8 @@
 #include "terrain_writer.h"
 
 int main() {
+	std::cout << static_cast<int>(0.4) << " " << static_cast<int>(0.6) << std::endl;
+
 	TerrainGenerator tg;
 	TerrainWriter tw;
 	TerrainMap tm(&tg, &tw);
