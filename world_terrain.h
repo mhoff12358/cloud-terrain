@@ -31,7 +31,7 @@ private:
 	Game& game;
 	array<int, 4> grid_size = {{-128, -128, 128, 128}}; //minx, miny, maxx, maxy
 	// CloudGrid world_grid = CloudGrid("bah", 0.01, 24.0);
-	PerlinGrid world_grid = PerlinGrid(array<int, 4>({{-2, -2, 2, 2}}), 64);
+	// PerlinGrid world_grid = PerlinGrid(array<int, 4>({{-2, -2, 2, 2}}), 64);
 	SimplexGenerator generator;
 	TerrainWriter writer;
 	TerrainMap world_map;
@@ -60,8 +60,7 @@ private:
 	unsigned int ground_vbo_size;
 	unsigned int loc_vbo_size;
 	unsigned int col_vbo_size;
-	unsigned int nor_vbo_size;
-	void add_cloud_vertex(int, int, float *, float *, float *);
+	void add_cloud_vertex(int, int, float *, float *);
 
 	void create_ocean_vbo();
 	GLuint ocean_vbo;
@@ -75,7 +74,6 @@ public:
 	void draw_terrain();
 	void draw_skypbox();
 	float get_height(const float, const float);
-	float get_height(const float, const float, const float);
 	const float* get_scale();
 
 	void position_sun(float);

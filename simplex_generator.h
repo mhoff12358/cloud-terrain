@@ -4,6 +4,7 @@
 #include <climits>
 
 #include "terrain_generator.h"
+#include "my_math.h"
 
 #ifndef __SIMPLEX_GENERATOR_H_INCLUDED__
 #define __SIMPLEX_GENERATOR_H_INCLUDED__

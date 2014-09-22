@@ -9,10 +9,6 @@ WorldTerrain::WorldTerrain(Game& g) : game(g) {
 }
 
 void WorldTerrain::initialize() {
-	// world_grid.resize_cloud(grid_size);
-	// world_grid.write_cloud("terrain.txt");
-	// write_grid("terrain.txt");
-
 	generate_stars(50);
 
 	create_ground_vbo();
@@ -34,19 +30,14 @@ void WorldTerrain::position_sun(float curr_time) {
 	}
 }
 
-void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc, float * normal_loc) {
+void WorldTerrain::add_cloud_vertex(int x, int y, float * vertex_loc, float * color_loc) {
 	TerrainPoint& vertex_point = world_map.getPoint({{x, y}});
 	vertex_loc[0] = (float)x*terrain_scale[0];
 	vertex_loc[1] = (float)y*terrain_scale[0];
 	vertex_loc[2] = vertex_point.height;
-	// vertex_loc[2] = world_grid.get_height(x, y)*terrain_scale[1];
-	color_loc[0] = 172.0/255.0+17.0/255.0*randf(-1.0, 1.0);
-	color_loc[1] = 172.0/255.0+10.0/255.0*randf(-1.0, 1.0);
-	color_loc[2] = 93.0/255.0+5.0/255.0*randf(-1.0, 1.0);
-	array<float, 3> normal_vector = world_grid.get_normal(x, y, terrain_scale);
-	normal_loc[0] = normal_vector[0];
-	normal_loc[1] = normal_vector[1];
-	normal_loc[2] = normal_vector[2]; //Visually, the ground is scaled vertically by terrain_scale[1]/terrain_scale[0]
+	for (int i = 0; i < 3; i++) {
+		color_loc[i] = vertex_point.color[i];
+	}
 }
 
 void WorldTerrain::create_ground_vbo() {
@@ -56,27 +47,23 @@ void WorldTerrain::create_ground_vbo() {
 	array<int, 4> cloud_grid_size = grid_size;
 	unsigned int loc_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int col_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
-	unsigned int nor_square_size = 3*3*2; //3 floats per vertex, 3 vertices per triangle, 2 triangles per square
 	unsigned int number_squares = (cloud_grid_size[2]-cloud_grid_size[0])*(cloud_grid_size[3]-cloud_grid_size[1]);
 	loc_vbo_size = loc_square_size * number_squares;
 	col_vbo_size = col_square_size * number_squares;
-	nor_vbo_size = nor_square_size * number_squares;
-	ground_vbo_size = loc_vbo_size + col_vbo_size + nor_vbo_size;
+	ground_vbo_size = loc_vbo_size + col_vbo_size;
 	float * cloud_data_buffer = new float[ground_vbo_size];
 	float * vert_iter = cloud_data_buffer;
 	float * color_iter = cloud_data_buffer+(loc_vbo_size);
-	float * norm_iter = cloud_data_buffer+(loc_vbo_size+col_vbo_size);
 	for (int y = cloud_grid_size[1]; y < cloud_grid_size[3]-1; y++) {
 		for (int x = cloud_grid_size[0]; x < cloud_grid_size[2]-1; x++) {
-			add_cloud_vertex(x  , y  , vert_iter+3*0, color_iter+3*0, norm_iter+3*0);
-			add_cloud_vertex(x  , y+1, vert_iter+3*1, color_iter+3*1, norm_iter+3*1);
-			add_cloud_vertex(x+1, y  , vert_iter+3*2, color_iter+3*2, norm_iter+3*2);
-			add_cloud_vertex(x+1, y  , vert_iter+3*3, color_iter+3*3, norm_iter+3*3);
-			add_cloud_vertex(x  , y+1, vert_iter+3*4, color_iter+3*4, norm_iter+3*4);
-			add_cloud_vertex(x+1, y+1, vert_iter+3*5, color_iter+3*5, norm_iter+3*5);
+			add_cloud_vertex(x  , y  , vert_iter+3*0, color_iter+3*0);
+			add_cloud_vertex(x  , y+1, vert_iter+3*1, color_iter+3*1);
+			add_cloud_vertex(x+1, y  , vert_iter+3*2, color_iter+3*2);
+			add_cloud_vertex(x+1, y  , vert_iter+3*3, color_iter+3*3);
+			add_cloud_vertex(x  , y+1, vert_iter+3*4, color_iter+3*4);
+			add_cloud_vertex(x+1, y+1, vert_iter+3*5, color_iter+3*5);
 			vert_iter += loc_square_size;
 			color_iter += col_square_size;
-			norm_iter += nor_square_size;
 		}
 	}
 
@@ -175,13 +162,6 @@ void WorldTerrain::create_skybox_vbo() {
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*skybox_num_tri*6, skybox_data_buffer, GL_STATIC_DRAW);
 }
-
-// void sphereVertex(float theta, float phi, float radius) {
-// 	float x = cos(theta)*sin(phi)*radius;
-// 	float z = sin(theta)*sin(phi)*radius;
-// 	float y = cos(phi)*radius;
-// 	glVertex3f(x, y, z);
-// }
 
 void sphereVertex(float * store, float theta, float phi, float radius) {
 	store[0] = cos(theta)*sin(phi)*radius;
@@ -363,29 +343,10 @@ void WorldTerrain::generate_stars(unsigned int num_stars) {
 }
 
 float WorldTerrain::get_height(const float x, const float y) {
-	return get_height(x, y, 0.0f);
-}
-
-float WorldTerrain::get_height(const float x, const float y, const float zoff) {
-	// return 20.0;
 	TerrainPoint player_point = world_map.getInterpolatedPoint({{x/terrain_scale[0], y/terrain_scale[0]}});
-	return player_point.height+zoff;
-	// return (world_grid.get_height_interp(x/terrain_scale[0], y/terrain_scale[0])+zoff)*terrain_scale[1];
-	// return world_grid.get_height(x/terrain_scale[0], y/terrain_scale[0])*terrain_scale[1];
+	return player_point.height;
 }
 
 const float * WorldTerrain::get_scale() {
 	return terrain_scale.data();
-}
-
-void WorldTerrain::write_grid(const string filename) {
-	std::ofstream ofile;
-	ofile.open(filename);
-	for (int x = grid_size[0]; x < grid_size[2]; x++) {
-		for (int y = grid_size[1]; y < grid_size[3]; y++) {
-			ofile << world_grid.get_height(x, y) << '|';
-		}
-		ofile << std::endl;
-	}
-	ofile.close();
 }

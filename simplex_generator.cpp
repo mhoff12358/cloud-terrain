@@ -8,8 +8,16 @@ TerrainPoint SimplexGenerator::createPoint(std::array<int, 2> point_index) {
 	// 	LayerValues layer = {(float)(10.0*pow(2, i)), (float)pow(0.5, 5*i), i};
 	// 	point.height += generateLayerHeight(layer, point_index);
 	// }
-	LayerValues layer = {1000.0f, 1.0f/64.0f, 0};
-	point.height = generateLayerHeight(layer, point_index);
+	LayerValues layer = {500.0f, 1.0f/64.0f, 0};
+	point.height += generateLayerHeight(layer, point_index);
+	layer = {250.0f, 1.0f/32.0f, 1};
+	point.height += generateLayerHeight(layer, point_index);
+	layer = {125.0f, 1.0f/16.0f, 2};
+	point.height += generateLayerHeight(layer, point_index);
+
+	point.color[0] = 172.0/255.0+17.0/255.0*randf(-1.0, 1.0);
+	point.color[1] = 172.0/255.0+10.0/255.0*randf(-1.0, 1.0);
+	point.color[2] = 93.0/255.0+5.0/255.0*randf(-1.0, 1.0);
 
 	return point;
 }
