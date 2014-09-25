@@ -39,9 +39,10 @@ private:
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;
 
-	array<float, 3>sun_dir = {{-1/pow(2, .5), 0, -1/pow(2, .5)}};
+	// Position of the sun relative to the viewer. This means the sun is
+	// shining in a direction of -sun_position.
+	std::array<float, 3> sun_position = {{0.0f, 0.0f, 0.0f}};
 	float ambient_brightness = 0.5;
-	float sun_angle = 0.0;
 	
 	void create_skybox_vbo();
 	GLuint skybox_vbo;
@@ -76,7 +77,7 @@ public:
 	float get_height(const float, const float);
 	const float* get_scale();
 
-	void position_sun(float);
+	void position_sun(array<float, 3> new_position);
 
 	void write_grid(const string);
 };

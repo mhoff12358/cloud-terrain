@@ -2,7 +2,6 @@
 
 uniform mat4 view_matrix;
 uniform mat4 proj_matrix;
-uniform vec3 sun_dir;
 uniform float ambient;
 
 in vec3 in_position;

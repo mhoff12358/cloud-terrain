@@ -1,6 +1,5 @@
 #version 150
 
-uniform vec3 sun_dir;
 uniform float ambient;
 
 in vec3 frag_color;

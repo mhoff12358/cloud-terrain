@@ -17,16 +17,12 @@ void WorldTerrain::initialize() {
 	create_stars_vbo();
 }
 
-void WorldTerrain::position_sun(float curr_time) {
-	sun_angle = curr_time/8.0;
-	sun_dir[0] = -cos(sun_angle);
-	sun_dir[1] = -sin(sun_angle);
-	if (sun_dir[1] > 0) {
-		sun_dir[0] = 0;
-		sun_dir[1] = 0;
-		ambient_brightness = 0.1;
-	} else {
+void WorldTerrain::position_sun(array<float, 3> new_position) {
+	sun_position = new_position;
+	if (sun_position[2] > 0) {
 		ambient_brightness = 0.5;
+	} else {
+		ambient_brightness = 0.1;
 	}
 }
 
@@ -217,7 +213,6 @@ void WorldTerrain::draw_terrain() {
 
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
-	glUniform3f(glGetUniformLocation(game.get_state().get_ground_prog(), "sun_dir"), sun_dir[0], sun_dir[1], sun_dir[2]);
 	glUniform1f(glGetUniformLocation(game.get_state().get_ground_prog(), "ambient"), ambient_brightness);
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
@@ -307,7 +302,10 @@ void WorldTerrain::draw_skypbox() {
 
 	//Sun!
 	glPushMatrix();
-	glRotatef(sun_angle*180/M_PI, 0, 0, 1);
+	float theta = atan2(sun_position[1], sun_position[0]);
+	float phi = asin(sun_position[2]); // Angle above/below the horizon
+	// glRotatef(theta*180.0/M_PI, 0, 0, 1);
+	// glRotatef(phi*180.0/M_PI, cos(theta-M_PI/2), sin(theta-M_PI/2), 0);
 	glGetFloatv(GL_MODELVIEW_MATRIX, mvmat);
 	glGetFloatv(GL_PROJECTION_MATRIX, promat);
 	glUseProgram(game.get_state().get_sun_prog());
