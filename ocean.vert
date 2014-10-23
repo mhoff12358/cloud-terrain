@@ -11,5 +11,5 @@ out vec3 frag_color;
 void main()
 {
 	gl_Position = proj_matrix*view_matrix*vec4(in_position.x, in_position.y, water_level, 1.0);
-	frag_color = vec4(0.0, 0.0, 1.0, 1.0);
+	frag_color = vec3(0.0, 0.0, 1.0);
 }
