@@ -11,7 +11,14 @@ WorldTerrain::WorldTerrain(Game& g) : game(g) {
 void WorldTerrain::initialize() {
 	generate_stars(50);
 
+	// Both creates the ground VBO and saves beforehand and after
+	writer.prepareFileForRead("terrain_saved.txt");
+	world_map.loadPoints();
+	writer.releaseFile();
 	create_ground_vbo();
+	writer.prepareFileForWrite("terrain_saved.txt");
+	world_map.savePoints();
+
 	create_ocean_vbo();
 	create_skybox_vbo();
 	create_stars_vbo();
@@ -70,6 +77,10 @@ void WorldTerrain::create_ground_vbo() {
 	delete[] cloud_data_buffer;
 
 	std::cout << "Number of vertices being passed to draw arrays: " << ground_vbo_size << std::endl;
+
+	// Now create the shadow buffer data
+	shadow_map.SetSize({{grid_size[0], grid_size[1]}}, {{grid_size[2]-grid_size[0], grid_size[3]-grid_size[1]}});
+	shadow_map.UpdateAllShadowHeights(world_map, sun_position);
 }
 
 void WorldTerrain::create_ocean_vbo() {
@@ -214,6 +225,7 @@ void WorldTerrain::draw_terrain() {
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "view_matrix"), 1, false, mvmat);
 	glUniformMatrix4fv(glGetUniformLocation(game.get_state().get_ground_prog(), "proj_matrix"), 1, false, promat);
 	glUniform1f(glGetUniformLocation(game.get_state().get_ground_prog(), "ambient"), ambient_brightness);
+	glUniform1f(glGetUniformLocation(game.get_state().get_ground_prog(), "in_shadow_height"), 500.0f);
 
 	glBindBuffer(GL_ARRAY_BUFFER, ground_vbo);
 	glEnableVertexAttribArray(game.get_state().ground_shad.shader_attributes[0].first);

@@ -21,6 +21,8 @@
 #include "terrain_map.h"
 #include "simplex_generator.h"
 
+#include "shadow_height_map.h"
+
 #define skybox_num_tri 36*3
 #define _USE_MATH_DEFINES
 
@@ -35,6 +37,8 @@ private:
 	SimplexGenerator generator;
 	TerrainWriter writer;
 	TerrainMap world_map;
+
+	ShadowHeightMap shadow_map;
 
 	const array<float, 2> terrain_scale = {{10, 100}};
 	const float sample_scale = .1;

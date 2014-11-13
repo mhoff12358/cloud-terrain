@@ -33,7 +33,7 @@ private:
 
 	void readPointsFromFile(std::fstream* fs, std::map<std::array<int, 2>, TerrainPoint>& loaded_map, int num_points);
 
-	bool logging = true;
+	bool logging = false;
 	std::unique_ptr<std::fstream> point_file = NULL;
 
 	static int terrainWriteSize;

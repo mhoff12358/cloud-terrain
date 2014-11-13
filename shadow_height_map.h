@@ -10,10 +10,17 @@
 
 class ShadowHeightMap {
 public:
-	ShadowHeightMap(const std::array<int, 2>& mcm, const std::array<int, 2>& mcs) : map_coords_minimum(mcm), map_coords_size(mcs) {};
+	ShadowHeightMap() {};
+	ShadowHeightMap(const std::array<int, 2>& mcm, const std::array<int, 2>& mcs) { SetSize(mcm, mcs); };
+
+	void SetSize(const std::array<int, 2>& mcm, const std::array<int, 2>& mcs);
 
 	float GetShadowHeight(const std::array<int, 2>& point_coords);
 	void SetShadowHeight(const std::array<int, 2>& point_coords, float new_height);
+
+	// Updates all shadow heights in the grid based on the given height map and
+	// lighting.
+	void UpdateAllShadowHeights(TerrainMap& height_map, const std::array<float, 3>& light_dir);
 
 private:
 	// The coordinates representing the minimum x, y values for the shadow height map
@@ -42,8 +49,4 @@ private:
 	// Update the shadow height map for the given point coordinates assuming that
 	// it is lit.
 	void UpdateShadowHeightAssumeLit(TerrainMap& height_map, const std::array<int, 2>& point_coords);
-
-	// Updates all shadow heights in the grid based on the given height map and
-	// lighting.
-	void UpdateAllShadowHeights(TerrainMap& height_map, const std::array<float, 3>& light_dir);
 };

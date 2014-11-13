@@ -1,5 +1,10 @@
 #include "shadow_height_map.h"
 
+void ShadowHeightMap::SetSize(const std::array<int, 2>& mcm, const std::array<int, 2>& mcs) {
+	map_coords_minimum = mcm;
+	map_coords_size = mcs;
+}
+
 std::array<float, 3> ShadowHeightMap::ScaleLightDependancy(const std::array<float, 3>& light_dir) {
 	// The goal is to scale light_dir so that it lies on the 2x2 square
 	// centered on the origin (scaling the z-value, but projecting onto the x-y
